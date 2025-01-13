@@ -72,20 +72,33 @@ def eval(
 
 
 ckpts = [
-    "/hpc2hdd/home/lzhang330/llm-toolkit/tmp/metamath/output_lora_rank16_scale1/checkpoint-2250",
+    # "/hpc2hdd/home/lzhang330/llm-toolkit/tmp/metamath/output_lora_rank16_scale1/checkpoint-2250",
 ]
 
+ranks = ["1", "2", "4", "8"]
+sparses = ["0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9"]
+
 if __name__ == "__main__":
-    for ckpt in ckpts:
-        eval(
-            model_name_or_path="meta-llama/Llama-2-7b-hf",
-            peft_name_or_path=ckpt,
-            load_in_4bit=False,
-        )
+    for rank in ranks:
+        for sparse in sparses:
+            path = f"/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank{rank}.sparse{sparse}.lora.output/checkpoint-3375"
+            ckpts.append(path)
 
     for ckpt in ckpts:
-        eval(
-            model_name_or_path="meta-llama/Llama-2-7b-hf",
-            peft_name_or_path=ckpt,
-            load_in_4bit=True,
-        )
+        if not os.path.exists(ckpt):
+            print(f"{ckpt} not exist!")
+
+
+    # for ckpt in ckpts:
+    #     eval(
+    #         model_name_or_path="meta-llama/Llama-2-7b-hf",
+    #         peft_name_or_path=ckpt,
+    #         load_in_4bit=False,
+    #     )
+
+    # for ckpt in ckpts:
+    #     eval(
+    #         model_name_or_path="meta-llama/Llama-2-7b-hf",
+    #         peft_name_or_path=ckpt,
+    #         load_in_4bit=True,
+    #     )

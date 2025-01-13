@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LLAMA2_7B=/hpc2hdd/home/lzhang330/asset/models/Llama-2-7b-hf
+LLAMA2_7B=meta-llama/Llama-2-7b-hf
 
 wandb offline
 
