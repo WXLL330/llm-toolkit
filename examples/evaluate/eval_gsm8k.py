@@ -177,35 +177,3 @@ if __name__ == "__main__":
         #     rank=rank,
         # )
     
-    # for rank in ranks:
-    #     for sparse in sparses:
-
-    #         path = f"/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank{rank}.sparse{sparse}.lora.output/checkpoint-3375"
-    #         # print_rank_0(f"lora eval llama2_7b.metamath40k.rank{rank}.sparse{sparse}.lora")
-    #         # # lora eval 16-bit and 4-bit
-    #         # eval(
-    #         #     base_model_name_or_path="meta-llama/Llama-2-7b-hf",
-    #         #     peft_model_name_or_path=path,
-    #         #     load_in_4bit=False,
-    #         # )
-    #         # eval(
-    #         #     base_model_name_or_path="meta-llama/Llama-2-7b-hf",
-    #         #     peft_model_name_or_path=path,
-    #         #     load_in_4bit=True,
-    #         # )
-
-    #         print_rank_0(f"sparse eval llama2_7b.metamath40k.rank{rank}.sparse{sparse}.lora")
-    #         # sparse eval 16-bit and 4-bit
-    #         # it is suggest to keep the sparsity_ratio the same as the checkpoint
-    #         eval(
-    #             base_model_name_or_path="meta-llama/Llama-2-7b-hf",
-    #             peft_model_name_or_path=path,
-    #             sparsity_ratio=sparse,
-    #             load_in_4bit=False,
-    #         )
-    #         eval(
-    #             base_model_name_or_path="meta-llama/Llama-2-7b-hf",
-    #             peft_model_name_or_path=path,
-    #             sparsity_ratio=sparse,
-    #             load_in_4bit=True,
-    #         )
