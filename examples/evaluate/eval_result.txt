@@ -1,0 +1,1127 @@
+{
+    "model": "meta-llama/Llama-2-7b-hf",
+    "peft": "/workspace/llm-toolkit/examples/finetune/lora-metamath40k-output/checkpoint-27000",
+    "bits": 16,
+    "task": "gsm8k",
+    "accuracy": 0.5443517816527672
+}
+{
+    "model": "meta-llama/Llama-2-7b-hf",
+    "peft": "/workspace/llm-toolkit/examples/finetune/qlora-metamath40k-output/checkpoint-3375",
+    "bits": 16,
+    "task": "gsm8k",
+    "accuracy": 0.5511751326762699
+}
+{
+    "model": "meta-llama/Llama-2-7b-hf",
+    "peft": "/workspace/llm-toolkit/examples/finetune/lora-metamath40k-output/checkpoint-27000",
+    "bits": 4,
+    "task": "gsm8k",
+    "accuracy": 0.5382865807429871
+}
+{
+    "model": "meta-llama/Llama-2-7b-hf",
+    "peft": "/workspace/llm-toolkit/examples/finetune/qlora-metamath40k-output/checkpoint-3375",
+    "bits": 4,
+    "task": "gsm8k",
+    "accuracy": 0.5314632297194845
+}
+{
+    "model": "mistralai/Mistral-7B-v0.3",
+    "peft": "/workspace/llm-toolkit/examples/finetune/mistral-lora-metamath40k-output/checkpoint-3375",
+    "bits": 16,
+    "task": "gsm8k",
+    "accuracy": 0.6914329037149356
+}
+{
+    "model": "mistralai/Mistral-7B-v0.3",
+    "peft": "/workspace/llm-toolkit/examples/finetune/mistral-lora-metamath40k-output/checkpoint-3375",
+    "bits": 4,
+    "task": "gsm8k",
+    "accuracy": 0.6755117513267627
+}
+{
+    "model": "mistralai/Mistral-7B-v0.3",
+    "peft": "/workspace/llm-toolkit/examples/finetune/mistral-qlora-metamath40k-output/checkpoint-3375",
+    "bits": 16,
+    "task": "gsm8k",
+    "accuracy": 0.6603487490523123
+}
+{
+    "model": "mistralai/Mistral-7B-v0.3",
+    "peft": "/workspace/llm-toolkit/examples/finetune/mistral-qlora-metamath40k-output/checkpoint-3375",
+    "bits": 4,
+    "task": "gsm8k",
+    "accuracy": 0.6618650492797574
+}
+{
+    "model": "meta-llama/Llama-2-7b-hf",
+    "peft": null,
+    "bits": 16,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.026535253980288095
+}
+{
+    "model": "meta-llama/Llama-2-7b-hf",
+    "peft": null,
+    "bits": 16,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.024260803639120546
+}
+{
+    "model": "meta-llama/Llama-2-7b-hf",
+    "peft": null,
+    "bits": 4,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.029567854435178165
+}
+{
+    "model": "meta-llama/Llama-2-7b-hf",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.1.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.4473085670962851
+}
+{
+    "model": "meta-llama/Llama-2-7b-hf",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.1.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.44200151630022744
+}
+{
+    "model": "./tmpyl0e2g_m",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.1.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.1,
+    "task": "gsm8k",
+    "accuracy": 0.47384382107657314
+}
+{
+    "model": "./tmp9oay6qfb",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.1.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.1,
+    "task": "gsm8k",
+    "accuracy": 0.4245640636846095
+}
+{
+    "model": "meta-llama/Llama-2-7b-hf",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.2.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.4351781652767248
+}
+{
+    "model": "meta-llama/Llama-2-7b-hf",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.2.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.4184988627748294
+}
+{
+    "model": "./tmpz6fhbhpx",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.2.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.2,
+    "task": "gsm8k",
+    "accuracy": 0.4624715693707354
+}
+{
+    "model": "./tmp9_x3ogsi",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.2.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.2,
+    "task": "gsm8k",
+    "accuracy": 0.40636846095526913
+}
+{
+    "model": "meta-llama/Llama-2-7b-hf",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.3.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.4131918119787718
+}
+{
+    "model": "meta-llama/Llama-2-7b-hf",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.3.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.4071266110689917
+}
+{
+    "model": "./tmpu8wu14ai",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.3.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.3,
+    "task": "gsm8k",
+    "accuracy": 0.4632297194844579
+}
+{
+    "model": "./tmpf0x1e3b3",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.3.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.3,
+    "task": "gsm8k",
+    "accuracy": 0.36239575435936316
+}
+{
+    "model": "meta-llama/Llama-2-7b-hf",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.4.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.3692191053828658
+}
+{
+    "model": "meta-llama/Llama-2-7b-hf",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.4.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.34420015163002277
+}
+{
+    "model": "./tmptnshlp_b",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.4.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.4,
+    "task": "gsm8k",
+    "accuracy": 0.45716451857467777
+}
+{
+    "model": "./tmpgetwbsq9",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.4.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.4,
+    "task": "gsm8k",
+    "accuracy": 0.3062926459438969
+}
+{
+    "model": "meta-llama/Llama-2-7b-hf",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.5.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.2175890826383624
+}
+{
+    "model": "meta-llama/Llama-2-7b-hf",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.5.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.20849128127369218
+}
+{
+    "model": "./tmp9q9x2h15",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.5.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.5,
+    "task": "gsm8k",
+    "accuracy": 0.39423805913570886
+}
+{
+    "model": "./tmp3pgedu4x",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.5.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.5,
+    "task": "gsm8k",
+    "accuracy": 0.17968157695223655
+}
+{
+    "model": "./tmp6z1t78ph",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.6.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.6,
+    "task": "gsm8k",
+    "accuracy": 0.35784685367702807
+}
+{
+    "model": "./tmpuso0qhco",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.6.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.6,
+    "task": "gsm8k",
+    "accuracy": 0.058377558756633814
+}
+{
+    "model": "./tmphn1cztj2",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.7.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.7,
+    "task": "gsm8k",
+    "accuracy": 0.2539802880970432
+}
+{
+    "model": "./tmp2l9r_key",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.7.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.7,
+    "task": "gsm8k",
+    "accuracy": 0.017437452615617893
+}
+{
+    "model": "./tmpp1flpvi6",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.8.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.8,
+    "task": "gsm8k",
+    "accuracy": 0.12509476876421532
+}
+{
+    "model": "./tmpw_kty0pw",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.8.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.8,
+    "task": "gsm8k",
+    "accuracy": 0.12585291887793784
+}
+{
+    "model": "./tmp89pusj_l",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.8.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.8,
+    "task": "gsm8k",
+    "accuracy": 0.12585291887793784
+}
+{
+    "model": "./tmpc3u826bx",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.8.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.8,
+    "task": "gsm8k",
+    "accuracy": 0.12357846853677028
+}
+{
+    "model": "./tmpspy563re",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.8.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.8,
+    "task": "gsm8k",
+    "accuracy": 0.017437452615617893
+}
+{
+    "model": "./tmp_ps9rkn4",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.9.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.9,
+    "task": "gsm8k",
+    "accuracy": 0.01819560272934041
+}
+{
+    "model": "./tmp695mcv9y",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.9.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.9,
+    "task": "gsm8k",
+    "accuracy": 0.009097801364670205
+}
+{
+    "model": "./tmpl1r6ye1m",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.9.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.9,
+    "task": "gsm8k",
+    "accuracy": 0.027293404094010616
+}
+{
+    "model": "./tmpr7pk8h9u",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.9.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.9,
+    "task": "gsm8k",
+    "accuracy": 0.013646702047005308
+}
+{
+    "model": "./tmptw9vh3z3",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.8.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.8,
+    "task": "gsm8k",
+    "accuracy": 0.15466262319939347
+}
+{
+    "model": "./tmpyck9rkfk",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.8.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.8,
+    "task": "gsm8k",
+    "accuracy": 0.016679302501895376
+}
+{
+    "model": "./tmpt_t63cf_",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.7.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.7,
+    "task": "gsm8k",
+    "accuracy": 0.29946929492039426
+}
+{
+    "model": "./tmp0w_ah0w_",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.7.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.7,
+    "task": "gsm8k",
+    "accuracy": 0.0841546626231994
+}
+{
+    "model": "./tmp17tyrtxx",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.6.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.6,
+    "task": "gsm8k",
+    "accuracy": 0.012130401819560273
+}
+{
+    "model": "./tmpy_pbzcu9",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.6.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.6,
+    "task": "gsm8k",
+    "accuracy": 0.01819560272934041
+}
+{
+    "model": "./tmp90grnhow",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.5.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.5,
+    "task": "gsm8k",
+    "accuracy": 0.043214556482183475
+}
+{
+    "model": "./tmpnbedb5sr",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.5.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.5,
+    "task": "gsm8k",
+    "accuracy": 0.02047005307050796
+}
+{
+    "model": "./tmpowwkfv3_",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.4.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.4,
+    "task": "gsm8k",
+    "accuracy": 0.26156178923426837
+}
+{
+    "model": "./tmptw5aks5b",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.4.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.4,
+    "task": "gsm8k",
+    "accuracy": 0.1910538286580743
+}
+{
+    "model": "./tmpfhf2jxnq",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.3.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.3,
+    "task": "gsm8k",
+    "accuracy": 0.40106141015921154
+}
+{
+    "model": "./tmp5l6p9fxe",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.3.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.3,
+    "task": "gsm8k",
+    "accuracy": 0.34420015163002277
+}
+{
+    "model": "./tmpt6818bef",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.2.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.2,
+    "task": "gsm8k",
+    "accuracy": 0.48218347232752085
+}
+{
+    "model": "./tmp9dwxb15n",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.2.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.2,
+    "task": "gsm8k",
+    "accuracy": 0.41015921152388174
+}
+{
+    "model": "./tmparr8z3p3",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.1.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.1,
+    "task": "gsm8k",
+    "accuracy": 0.49583017437452614
+}
+{
+    "model": "./tmpz793lo2f",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.1.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.1,
+    "task": "gsm8k",
+    "accuracy": 0.4518574677786202
+}
+{
+    "model": "./tmphp3fvpzw",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank4.sparse0.9.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.9,
+    "task": "gsm8k",
+    "accuracy": 0.003032600454890068
+}
+{
+    "model": "./tmpnlpu1ldj",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank4.sparse0.9.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.9,
+    "task": "gsm8k",
+    "accuracy": 0.003032600454890068
+}
+{
+    "model": "./tmp52s0htlk",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank4.sparse0.8.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.8,
+    "task": "gsm8k",
+    "accuracy": 0.003032600454890068
+}
+{
+    "model": "./tmptjx3vw33",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank4.sparse0.8.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.8,
+    "task": "gsm8k",
+    "accuracy": 0.003032600454890068
+}
+{
+    "model": "./tmpjvkciw56",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank4.sparse0.7.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.7,
+    "task": "gsm8k",
+    "accuracy": 0.009855951478392721
+}
+{
+    "model": "./tmp1yzuonoh",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank4.sparse0.7.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.7,
+    "task": "gsm8k",
+    "accuracy": 0.011372251705837756
+}
+{
+    "model": "./tmphhpq5v1z",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank4.sparse0.6.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.6,
+    "task": "gsm8k",
+    "accuracy": 0.014404852160727824
+}
+{
+    "model": "./tmp98dzq127",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank4.sparse0.6.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.6,
+    "task": "gsm8k",
+    "accuracy": 0.01592115238817286
+}
+{
+    "model": "./tmp0hubjhx_",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank4.sparse0.5.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.5,
+    "task": "gsm8k",
+    "accuracy": 0.06520090978013647
+}
+{
+    "model": "./tmpv8idc7mj",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank4.sparse0.5.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.5,
+    "task": "gsm8k",
+    "accuracy": 0.029567854435178165
+}
+{
+    "model": "./tmp8b1jurgs",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank4.sparse0.4.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.4,
+    "task": "gsm8k",
+    "accuracy": 0.29037149355572406
+}
+{
+    "model": "./tmp_i4lbomx",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank4.sparse0.4.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.4,
+    "task": "gsm8k",
+    "accuracy": 0.23351023502653526
+}
+{
+    "model": "./tmpmdrmtyy1",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank4.sparse0.3.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.3,
+    "task": "gsm8k",
+    "accuracy": 0.4230477634571645
+}
+{
+    "model": "./tmp4vq1paw3",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank4.sparse0.3.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.3,
+    "task": "gsm8k",
+    "accuracy": 0.35633055344958303
+}
+{
+    "model": "./tmpn8v0h3tl",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank4.sparse0.2.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.2,
+    "task": "gsm8k",
+    "accuracy": 0.4981046247156937
+}
+{
+    "model": "./tmpuxnuc868",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank4.sparse0.2.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.2,
+    "task": "gsm8k",
+    "accuracy": 0.4397270659590599
+}
+{
+    "model": "./tmpual1yj22",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank4.sparse0.1.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.1,
+    "task": "gsm8k",
+    "accuracy": 0.5193328278999242
+}
+{
+    "model": "./tmpy_ovkju6",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank4.sparse0.1.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.1,
+    "task": "gsm8k",
+    "accuracy": 0.4844579226686884
+}
+{
+    "model": "./tmphf_yytdw",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank8.sparse0.9.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.9,
+    "task": "gsm8k",
+    "accuracy": 0.003032600454890068
+}
+{
+    "model": "./tmp8a17einb",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank8.sparse0.9.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.9,
+    "task": "gsm8k",
+    "accuracy": 0.003032600454890068
+}
+{
+    "model": "./tmpgyetnk6h",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank8.sparse0.8.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.8,
+    "task": "gsm8k",
+    "accuracy": 0.003032600454890068
+}
+{
+    "model": "./tmpeb65yo0m",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank8.sparse0.8.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.8,
+    "task": "gsm8k",
+    "accuracy": 0.003032600454890068
+}
+{
+    "model": "./tmppyk9q470",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank8.sparse0.7.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.7,
+    "task": "gsm8k",
+    "accuracy": 0.01061410159211524
+}
+{
+    "model": "./tmpvzmld3ip",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank8.sparse0.7.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.7,
+    "task": "gsm8k",
+    "accuracy": 0.01061410159211524
+}
+{
+    "model": "./tmpq64g_xks",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank8.sparse0.6.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.6,
+    "task": "gsm8k",
+    "accuracy": 0.01592115238817286
+}
+{
+    "model": "./tmp80pt92bl",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank8.sparse0.6.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.6,
+    "task": "gsm8k",
+    "accuracy": 0.01592115238817286
+}
+{
+    "model": "./tmpc7gbmc1h",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank8.sparse0.5.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.5,
+    "task": "gsm8k",
+    "accuracy": 0.05913570887035633
+}
+{
+    "model": "./tmppb_v_s1g",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank8.sparse0.5.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.5,
+    "task": "gsm8k",
+    "accuracy": 0.050037907505686124
+}
+{
+    "model": "./tmp7wimx6sx",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank8.sparse0.4.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.4,
+    "task": "gsm8k",
+    "accuracy": 0.3169067475360121
+}
+{
+    "model": "./tmp_5cjs_6h",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank8.sparse0.4.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.4,
+    "task": "gsm8k",
+    "accuracy": 0.2539802880970432
+}
+{
+    "model": "./tmpwyltq23p",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank8.sparse0.3.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.3,
+    "task": "gsm8k",
+    "accuracy": 0.4495830174374526
+}
+{
+    "model": "./tmpidl019_9",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank8.sparse0.3.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.3,
+    "task": "gsm8k",
+    "accuracy": 0.41470811220621684
+}
+{
+    "model": "./tmpkyaz3oic",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank8.sparse0.2.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.2,
+    "task": "gsm8k",
+    "accuracy": 0.5200909780136467
+}
+{
+    "model": "./tmpvurc7a9f",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank8.sparse0.2.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.2,
+    "task": "gsm8k",
+    "accuracy": 0.4632297194844579
+}
+{
+    "model": "./tmpzpleatpp",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank8.sparse0.1.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.1,
+    "task": "gsm8k",
+    "accuracy": 0.5504169825625473
+}
+{
+    "model": "./tmpmwdodg_r",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank8.sparse0.1.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.1,
+    "task": "gsm8k",
+    "accuracy": 0.5018953752843063
+}
+{
+    "model": "./tmp2u515eqc",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.7.lora.output/checkpoint-3375",
+    "bits": 16,
+    "sparse": 0.7,
+    "task": "gsm8k",
+    "accuracy": 0.29946929492039426
+}
+{
+    "model": "./tmpg00zcrw0",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.7.lora.output/checkpoint-3375",
+    "bits": 4,
+    "sparse": 0.7,
+    "task": "gsm8k",
+    "accuracy": 0.0841546626231994
+}
+{
+    "model": "./tmpezrmpbes",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.9.lora.output/checkpoint-3375",
+    "bits": 16,
+    "rank": 1,
+    "sparse": 0.9,
+    "task": "gsm8k",
+    "accuracy": 0.01819560272934041
+}
+{
+    "model": "./tmp3kw54qun",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.9.lora.output/checkpoint-3375",
+    "bits": 4,
+    "rank": 1,
+    "sparse": 0.9,
+    "task": "gsm8k",
+    "accuracy": 0.009097801364670205
+}
+{
+    "model": "./tmplg07t0fw",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.8.lora.output/checkpoint-3375",
+    "bits": 16,
+    "rank": 1,
+    "sparse": 0.8,
+    "task": "gsm8k",
+    "accuracy": 0.12357846853677028
+}
+{
+    "model": "./tmpfgxdpr0i",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.8.lora.output/checkpoint-3375",
+    "bits": 4,
+    "rank": 1,
+    "sparse": 0.8,
+    "task": "gsm8k",
+    "accuracy": 0.017437452615617893
+}
+{
+    "model": "./tmpl_st21c8",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.7.lora.output/checkpoint-3375",
+    "bits": 16,
+    "rank": 1,
+    "sparse": 0.7,
+    "task": "gsm8k",
+    "accuracy": 0.2539802880970432
+}
+{
+    "model": "./tmplcvpn5r4",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.7.lora.output/checkpoint-3375",
+    "bits": 4,
+    "rank": 1,
+    "sparse": 0.7,
+    "task": "gsm8k",
+    "accuracy": 0.017437452615617893
+}
+{
+    "model": "./tmprkyr686i",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.6.lora.output/checkpoint-3375",
+    "bits": 16,
+    "rank": 1,
+    "sparse": 0.6,
+    "task": "gsm8k",
+    "accuracy": 0.3555724033358605
+}
+{
+    "model": "./tmp6g0judlq",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.6.lora.output/checkpoint-3375",
+    "bits": 4,
+    "rank": 1,
+    "sparse": 0.6,
+    "task": "gsm8k",
+    "accuracy": 0.058377558756633814
+}
+{
+    "model": "./tmpwpbs20ix",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.5.lora.output/checkpoint-3375",
+    "bits": 16,
+    "rank": 1,
+    "sparse": 0.5,
+    "task": "gsm8k",
+    "accuracy": 0.3934799090219864
+}
+{
+    "model": "./tmpdpwxy6nh",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.5.lora.output/checkpoint-3375",
+    "bits": 4,
+    "rank": 1,
+    "sparse": 0.5,
+    "task": "gsm8k",
+    "accuracy": 0.17968157695223655
+}
+{
+    "model": "./tmpfj4yzg9d",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.4.lora.output/checkpoint-3375",
+    "bits": 16,
+    "rank": 1,
+    "sparse": 0.4,
+    "task": "gsm8k",
+    "accuracy": 0.4579226686884003
+}
+{
+    "model": "./tmp6ht8vmbe",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.4.lora.output/checkpoint-3375",
+    "bits": 4,
+    "rank": 1,
+    "sparse": 0.4,
+    "task": "gsm8k",
+    "accuracy": 0.3062926459438969
+}
+{
+    "model": "./tmpuj_g3dsu",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.3.lora.output/checkpoint-3375",
+    "bits": 16,
+    "rank": 1,
+    "sparse": 0.3,
+    "task": "gsm8k",
+    "accuracy": 0.4632297194844579
+}
+{
+    "model": "./tmpo6d7o2td",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.3.lora.output/checkpoint-3375",
+    "bits": 4,
+    "rank": 1,
+    "sparse": 0.3,
+    "task": "gsm8k",
+    "accuracy": 0.36239575435936316
+}
+{
+    "model": "./tmpmzfa9vkv",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.2.lora.output/checkpoint-3375",
+    "bits": 16,
+    "rank": 1,
+    "sparse": 0.2,
+    "task": "gsm8k",
+    "accuracy": 0.46171341925701287
+}
+{
+    "model": "./tmprjjdw6um",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.2.lora.output/checkpoint-3375",
+    "bits": 4,
+    "rank": 1,
+    "sparse": 0.2,
+    "task": "gsm8k",
+    "accuracy": 0.40636846095526913
+}
+{
+    "model": "./tmpuerdufet",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.1.lora.output/checkpoint-3375",
+    "bits": 16,
+    "rank": 1,
+    "sparse": 0.1,
+    "task": "gsm8k",
+    "accuracy": 0.47384382107657314
+}
+{
+    "model": "./tmp5r6nah2e",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank1.sparse0.1.lora.output/checkpoint-3375",
+    "bits": 4,
+    "rank": 1,
+    "sparse": 0.1,
+    "task": "gsm8k",
+    "accuracy": 0.4245640636846095
+}
+{
+    "model": "./tmpmdph0hd2",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.9.lora.output/checkpoint-3375",
+    "bits": 16,
+    "rank": 2,
+    "sparse": 0.9,
+    "task": "gsm8k",
+    "accuracy": 0.027293404094010616
+}
+{
+    "model": "./tmp4rcnury7",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.9.lora.output/checkpoint-3375",
+    "bits": 4,
+    "rank": 2,
+    "sparse": 0.9,
+    "task": "gsm8k",
+    "accuracy": 0.013646702047005308
+}
+{
+    "model": "./tmpy8imou3u",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.8.lora.output/checkpoint-3375",
+    "bits": 16,
+    "rank": 2,
+    "sparse": 0.8,
+    "task": "gsm8k",
+    "accuracy": 0.15466262319939347
+}
+{
+    "model": "./tmpp48mrde4",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.8.lora.output/checkpoint-3375",
+    "bits": 4,
+    "rank": 2,
+    "sparse": 0.8,
+    "task": "gsm8k",
+    "accuracy": 0.016679302501895376
+}
+{
+    "model": "./tmpf8w_toy9",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.7.lora.output/checkpoint-3375",
+    "bits": 16,
+    "rank": 2,
+    "sparse": 0.7,
+    "task": "gsm8k",
+    "accuracy": 0.29946929492039426
+}
+{
+    "model": "./tmpx0y4ol4_",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.7.lora.output/checkpoint-3375",
+    "bits": 4,
+    "rank": 2,
+    "sparse": 0.7,
+    "task": "gsm8k",
+    "accuracy": 0.0841546626231994
+}
+{
+    "model": "./tmpq7camual",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.6.lora.output/checkpoint-3375",
+    "bits": 16,
+    "rank": 2,
+    "sparse": 0.6,
+    "task": "gsm8k",
+    "accuracy": 0.012130401819560273
+}
+{
+    "model": "./tmpoz5p112y",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.6.lora.output/checkpoint-3375",
+    "bits": 4,
+    "rank": 2,
+    "sparse": 0.6,
+    "task": "gsm8k",
+    "accuracy": 0.01819560272934041
+}
+{
+    "model": "./tmpkvjchap0",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.5.lora.output/checkpoint-3375",
+    "bits": 16,
+    "rank": 2,
+    "sparse": 0.5,
+    "task": "gsm8k",
+    "accuracy": 0.043214556482183475
+}
+{
+    "model": "./tmpdj9egnke",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.5.lora.output/checkpoint-3375",
+    "bits": 4,
+    "rank": 2,
+    "sparse": 0.5,
+    "task": "gsm8k",
+    "accuracy": 0.02047005307050796
+}
+{
+    "model": "./tmpm0nwj4cn",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.4.lora.output/checkpoint-3375",
+    "bits": 16,
+    "rank": 2,
+    "sparse": 0.4,
+    "task": "gsm8k",
+    "accuracy": 0.26156178923426837
+}
+{
+    "model": "./tmp8bmdz186",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.4.lora.output/checkpoint-3375",
+    "bits": 4,
+    "rank": 2,
+    "sparse": 0.4,
+    "task": "gsm8k",
+    "accuracy": 0.1910538286580743
+}
+{
+    "model": "./tmp2g0dvcyt",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.3.lora.output/checkpoint-3375",
+    "bits": 16,
+    "rank": 2,
+    "sparse": 0.3,
+    "task": "gsm8k",
+    "accuracy": 0.40106141015921154
+}
+{
+    "model": "./tmpot6y1wlq",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.3.lora.output/checkpoint-3375",
+    "bits": 4,
+    "rank": 2,
+    "sparse": 0.3,
+    "task": "gsm8k",
+    "accuracy": 0.34420015163002277
+}
+{
+    "model": "./tmpfqcvmc3h",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.2.lora.output/checkpoint-3375",
+    "bits": 16,
+    "rank": 2,
+    "sparse": 0.2,
+    "task": "gsm8k",
+    "accuracy": 0.48218347232752085
+}
+{
+    "model": "./tmpekux6nwa",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.2.lora.output/checkpoint-3375",
+    "bits": 4,
+    "rank": 2,
+    "sparse": 0.2,
+    "task": "gsm8k",
+    "accuracy": 0.41015921152388174
+}
+{
+    "model": "./tmpw4q2lxrs",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.1.lora.output/checkpoint-3375",
+    "bits": 16,
+    "rank": 2,
+    "sparse": 0.1,
+    "task": "gsm8k",
+    "accuracy": 0.49583017437452614
+}
+{
+    "model": "./tmp7isxmej1",
+    "peft": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank2.sparse0.1.lora.output/checkpoint-3375",
+    "bits": 4,
+    "rank": 2,
+    "sparse": 0.1,
+    "task": "gsm8k",
+    "accuracy": 0.4518574677786202
+}
+{
+    "model": "./tmp7e2ginvi",
+    "peft": "../finetune/extern_test_llama2_7b.metamath40k.rank2.sparse0.7.lora.output/checkpoint-3375",
+    "bits": 16,
+    "rank": 2,
+    "sparse": 0.7,
+    "task": "gsm8k",
+    "accuracy": 0.011372251705837756
+}
+{
+    "model": "./tmpmx5xd3cb",
+    "peft": "/workspace/llm-toolkit/examples/finetune/extern_test_llama2_7b.metamath40k.rank2.sparse0.9.lora.output/checkpoint-3375",
+    "bits": 16,
+    "rank": 2,
+    "sparse": 0.9,
+    "task": "gsm8k",
+    "accuracy": 0.0310841546626232
+}
+{
+    "model": "./tmpnequ64oy",
+    "peft": "/workspace/llm-toolkit/examples/finetune/extern_test_llama2_7b.metamath40k.rank2.sparse0.8.lora.output/checkpoint-3375",
+    "bits": 16,
+    "rank": 2,
+    "sparse": 0.8,
+    "task": "gsm8k",
+    "accuracy": 0.14859742228961334
+}

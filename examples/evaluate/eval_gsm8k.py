@@ -13,6 +13,8 @@ from llmtoolkit import (
     prune_magnitude,
 )
 
+import argparse 
+
 
 def find_adapter_model_paths(root_dir):
     matching_paths = []
@@ -29,6 +31,7 @@ def eval(
     load_in_4bit: bool = False,
     sparsity_ratio: float = None,
     structured_sparse: bool = False,
+    rank: int = None,
 ):
     temp_dirs = []  # reserved for temp dirs used in current eval process
     if structured_sparse:
@@ -88,6 +91,7 @@ def eval(
     results["model"] = base_model_name_or_path
     results["peft"] = peft_model_name_or_path
     results["bits"] = 4 if load_in_4bit else 16
+    results["rank"] = rank
     results["sparse"] = sparsity_ratio
     results["task"] = task
     results["accuracy"] = acc
@@ -96,44 +100,112 @@ def eval(
         shutil.rmtree(t)
 
 
-ckpts = [
-    "/hpc2hdd/home/lzhang330/llm-toolkit/tmp/metamath/output_lora_rank16_scale1/checkpoint-2250",
-]
+# ckpts = [
+#     # "/hpc2hdd/home/lzhang330/llm-toolkit/tmp/metamath/output_lora_rank16_scale1/checkpoint-2250",
+# ]
+# ranks = [1, 2, 4, 8]
+# ranks = [1]
+# sparses = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+# sparses = [0.7, 0.8, 0.9]
 
 if __name__ == "__main__":
-    # base model eval 16-bit and 4-bit
-    eval(
-        base_model_name_or_path="meta-llama/Llama-2-7b-hf",
-        load_in_4bit=False,
-    )
-    eval(
-        base_model_name_or_path="meta-llama/Llama-2-7b-hf",
-        load_in_4bit=True,
-    )
+    parser = argparse.ArgumentParser(description='eval model')
+    parser.add_argument('--base', type=str, default="meta-llama/Llama-2-7b-hf", help='peft_model_name_or_path')
+    parser.add_argument('--ckpt', type=str, required=True, help='peft_model_name_or_path')
+    parser.add_argument('--sparsity_ratio', type=float, default=1.0, help='sparsity_ratio')
+    parser.add_argument('--rank', type=int, default=0, help='lora rank')
 
+    parser.add_argument('--eval_base', action='store_true', help='if eval base model')
+    parser.add_argument('--eval_lora', action='store_true', help='if eval lora model')
+    parser.add_argument('--eval_sparse', action='store_true', help='if eval sparse model')
+
+    args = parser.parse_args()
+
+    base_model = args.base
+    ckpt = args.ckpt
+    sparsity_ratio = args.sparsity_ratio
+    rank = args.rank
+
+    # base model eval 16-bit and 4-bit
+    if args.eval_base:
+        print_rank_0(f"eval base model: {base_model} in 16bit... ...")
+        eval(
+            base_model_name_or_path=base_model,
+            load_in_4bit=False,
+        )
+        print_rank_0(f"eval base model: {base_model} in 4bit... ...")
+        eval(
+            base_model_name_or_path=base_model,
+            load_in_4bit=True,
+        )
+    
     # lora eval 16-bit and 4-bit
-    eval(
-        base_model_name_or_path="meta-llama/Llama-2-7b-hf",
-        peft_model_name_or_path="llama2-7b.metamath40k.lora.checkpoint",
-        load_in_4bit=False,
-    )
-    eval(
-        base_model_name_or_path="meta-llama/Llama-2-7b-hf",
-        peft_model_name_or_path="llama2-7b.metamath40k.lora.checkpoint",
-        load_in_4bit=True,
-    )
+    if args.eval_lora:
+        print_rank_0(f"eval ckpt.lora.rank{rank}: {ckpt} in 16bit... ...")
+        eval(
+            base_model_name_or_path=base_model,
+            peft_model_name_or_path=ckpt,
+            load_in_4bit=False,
+            rank=rank,
+        )
+        print_rank_0(f"eval ckpt.lora.rank{rank}: {ckpt} in 4bit... ...")
+        eval(
+            base_model_name_or_path=base_model,
+            peft_model_name_or_path=ckpt,
+            load_in_4bit=True,
+            rank=rank,
+        )
 
     # sparse eval 16-bit and 4-bit
     # it is suggest to keep the sparsity_ratio the same as the checkpoint
-    eval(
-        base_model_name_or_path="meta-llama/Llama-2-7b-hf",
-        peft_model_name_or_path="llama2-7b.metamath40k.sparse0.5.lora.output/checkpoint-1000",
-        sparsity_ratio=0.5,
-        load_in_4bit=False,
-    )
-    eval(
-        base_model_name_or_path="meta-llama/Llama-2-7b-hf",
-        peft_model_name_or_path="llama2-7b.metamath40k.sparse0.5.lora.output/checkpoint-1000",
-        sparsity_ratio=0.5,
-        load_in_4bit=True,
-    )
+    if args.eval_sparse:
+        print_rank_0(f"eval ckpt.sparse{sparsity_ratio}: {ckpt} in 16bit... ...")
+        eval(
+            base_model_name_or_path=base_model,
+            peft_model_name_or_path=ckpt,
+            sparsity_ratio=sparsity_ratio,
+            load_in_4bit=False,
+            rank=rank,
+        )
+        # torch.distributed.destroy_process_group()
+        # print_rank_0(f"eval ckpt.sparse{sparsity_ratio}: {ckpt} in 4bit... ...")
+        # eval(
+        #     base_model_name_or_path=base_model,
+        #     peft_model_name_or_path=ckpt,
+        #     sparsity_ratio=sparsity_ratio,
+        #     load_in_4bit=True,
+        #     rank=rank,
+        # )
+    
+    # for rank in ranks:
+    #     for sparse in sparses:
+
+    #         path = f"/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.rank{rank}.sparse{sparse}.lora.output/checkpoint-3375"
+    #         # print_rank_0(f"lora eval llama2_7b.metamath40k.rank{rank}.sparse{sparse}.lora")
+    #         # # lora eval 16-bit and 4-bit
+    #         # eval(
+    #         #     base_model_name_or_path="meta-llama/Llama-2-7b-hf",
+    #         #     peft_model_name_or_path=path,
+    #         #     load_in_4bit=False,
+    #         # )
+    #         # eval(
+    #         #     base_model_name_or_path="meta-llama/Llama-2-7b-hf",
+    #         #     peft_model_name_or_path=path,
+    #         #     load_in_4bit=True,
+    #         # )
+
+    #         print_rank_0(f"sparse eval llama2_7b.metamath40k.rank{rank}.sparse{sparse}.lora")
+    #         # sparse eval 16-bit and 4-bit
+    #         # it is suggest to keep the sparsity_ratio the same as the checkpoint
+    #         eval(
+    #             base_model_name_or_path="meta-llama/Llama-2-7b-hf",
+    #             peft_model_name_or_path=path,
+    #             sparsity_ratio=sparse,
+    #             load_in_4bit=False,
+    #         )
+    #         eval(
+    #             base_model_name_or_path="meta-llama/Llama-2-7b-hf",
+    #             peft_model_name_or_path=path,
+    #             sparsity_ratio=sparse,
+    #             load_in_4bit=True,
+    #         )
