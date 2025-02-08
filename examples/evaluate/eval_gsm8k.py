@@ -128,16 +128,16 @@ if __name__ == "__main__":
 
     # base model eval 16-bit and 4-bit
     if args.eval_base:
-        print_rank_0(f"eval base model: {base_model} in 16bit... ...")
+        # print_rank_0(f"eval base model: {base_model} in 16bit... ...")
         eval(
-            base_model_name_or_path=base_model,
+            base_model_name_or_path=ckpt,
             load_in_4bit=False,
         )
-        print_rank_0(f"eval base model: {base_model} in 4bit... ...")
-        eval(
-            base_model_name_or_path=base_model,
-            load_in_4bit=True,
-        )
+        # print_rank_0(f"eval base model: {base_model} in 4bit... ...")
+        # eval(
+        #     base_model_name_or_path=base_model,
+        #     load_in_4bit=True,
+        # )
     
     # lora eval 16-bit and 4-bit
     if args.eval_lora:

@@ -1125,3 +1125,273 @@
     "task": "gsm8k",
     "accuracy": 0.14859742228961334
 }
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.3.sparse_warmup_ratio0.1.sparse_warmup_steps1.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.5572403335860501
+}
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.3.sparse_warmup_ratio0.1.sparse_warmup_steps2.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.5564821834723275
+}
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.3.sparse_warmup_ratio0.2.sparse_warmup_steps1.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.5602729340409401
+}
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.3.sparse_warmup_ratio0.2.sparse_warmup_steps2.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.5724033358605004
+}
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.3.sparse_warmup_ratio0.3.sparse_warmup_steps1.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.577710386656558
+}
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.3.sparse_warmup_ratio0.3.sparse_warmup_steps2.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.5496588324488249
+}
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.3.sparse_warmup_ratio0.4.sparse_warmup_steps1.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.5511751326762699
+}
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.3.sparse_warmup_ratio0.4.sparse_warmup_steps2.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.5716451857467779
+}
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.3.sparse_warmup_ratio0.5.sparse_warmup_steps1.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.5595147839272175
+}
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.3.sparse_warmup_ratio0.5.sparse_warmup_steps2.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.5413191811978771
+}
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.4.sparse_warmup_ratio0.1.sparse_warmup_steps1.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.5496588324488249
+}
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.4.sparse_warmup_ratio0.1.sparse_warmup_steps2.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.55420773313116
+}
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.4.sparse_warmup_ratio0.2.sparse_warmup_steps1.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.5640636846095527
+}
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.4.sparse_warmup_ratio0.2.sparse_warmup_steps2.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.5451099317664898
+}
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.4.sparse_warmup_ratio0.3.sparse_warmup_steps1.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.5390447308567097
+}
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.4.sparse_warmup_ratio0.3.sparse_warmup_steps2.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.5511751326762699
+}
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.4.sparse_warmup_ratio0.4.sparse_warmup_steps1.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.5526914329037149
+}
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.4.sparse_warmup_ratio0.4.sparse_warmup_steps2.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.5344958301743745
+}
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.4.sparse_warmup_ratio0.5.sparse_warmup_steps1.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.5276724791508719
+}
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.4.sparse_warmup_ratio0.5.sparse_warmup_steps2.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.5428354814253222
+}
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.5.sparse_warmup_ratio0.1.sparse_warmup_steps1.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.5253980288097043
+}
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.5.sparse_warmup_ratio0.1.sparse_warmup_steps2.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.5314632297194845
+}
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.5.sparse_warmup_ratio0.2.sparse_warmup_steps1.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.5420773313115997
+}
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.5.sparse_warmup_ratio0.2.sparse_warmup_steps2.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.5276724791508719
+}
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.5.sparse_warmup_ratio0.3.sparse_warmup_steps1.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.5238817285822593
+}
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.5.sparse_warmup_ratio0.3.sparse_warmup_steps2.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.533737680060652
+}
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.5.sparse_warmup_ratio0.4.sparse_warmup_steps1.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.5094768764215315
+}
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.5.sparse_warmup_ratio0.4.sparse_warmup_steps2.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.5299469294920395
+}
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.5.sparse_warmup_ratio0.5.sparse_warmup_steps1.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.5216072782410918
+}
+{
+    "model": "/workspace/llm-toolkit/examples/finetune/llama2_7b.metamath40k.lora.sparse0.5.sparse_warmup_ratio0.5.sparse_warmup_steps2.output/merged",
+    "peft": null,
+    "bits": 16,
+    "rank": null,
+    "sparse": null,
+    "task": "gsm8k",
+    "accuracy": 0.5246398786959818
+}
