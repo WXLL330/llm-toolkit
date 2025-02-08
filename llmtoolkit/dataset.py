@@ -98,6 +98,13 @@ Most of the training prompts are aligned with lm-eval, which is the same as 🤗
 class SFTPrompt:
     question: str = "Question: {question}\nAnswer: "
     answer: str = "{answer}\n\n"
+    instruction_choices: str = (
+        "Question: {instruction}\n"
+        
+        "Below is a multiple choice question paired with choices."
+        "Select a best answer for this question.\n\n"
+        "#### Instruction:\n{instruction}\n\n#### Input:\n{input}\n\n#### Response: "
+    )
     instruction_input: str = (
         "Below is an instruction that describes a task, paired with an input that provides further context. "
         "Write a response that appropriately completes the request.\n\n"
@@ -310,6 +317,38 @@ def preprocess_codefeedback(dataset: datasets.Dataset) -> datasets.Dataset:
 
     return dataset.map(_preprocess_doc)
 
+def preprocess_tulu_v3(dataset: datasets.Dataset) -> datasets.Dataset:
+    new_dataset = []
+
+    def _process_doc(example):
+        if len(example['messages']) == 2:
+            user_content = next(item['content'] for item in example['messages'] if item['role'] == 'user')
+            assistant_content = next(item['content'] for item in example['messages'] if item['role'] == 'assistant')
+            new_dataset.append({"input":SFTPrompt.instruction.format(instruction=user_content), "output":assistant_content})
+
+    dataset = dataset.map(_process_doc)
+    new_dataset = Dataset.from_list(new_dataset).train_test_split(test_size=0.2)
+    return new_dataset
+
+def preprocess_mmlu(dataset: datasets.Dataset) -> datasets.Dataset:
+    new_dataset = []
+    labels = ["A", "B", "C", "D"]
+    def _preprocess_doc(example):
+        slice = example["train"]
+        input = f"Question: {slice['question']}\n"
+        
+        for label, choice in zip(labels, slice["choices"]):
+            input = input + f"{label}. {choice}\n"
+        input = input+"Answer: "
+        output = f"{labels[slice['answer']]}. {slice['choices'][slice['answer']]}"
+
+        new_dataset.append({"input":input, "output":output})
+
+    dataset.map(_preprocess_doc)
+    new_dataset = Dataset.from_list(new_dataset).train_test_split(test_size=0.1)
+    return new_dataset
+
+
 """
 Make dataset and collator for supervised fine-tuning.
 Datasets are expected to have the following columns: { `input`, `output` }
@@ -337,6 +376,8 @@ DATASETS_ARGS = {
     "metamath40k": ("meta-math/MetaMathQA-40K", {}),
     "wizardlm70k": ("WizardLMTeam/WizardLM_evol_instruct_70k", {}),
     "codefeedback": ("m-a-p/CodeFeedback-Filtered-Instruction", {}),
+    "tuluv3": ("allenai/tulu-3-sft-mixture", {}),
+    "mmlu": ("cais/mmlu", {"name": "auxiliary_train", "split": "train"}),
 }
 
 FORMAT_FUNCTIONS = {
@@ -359,6 +400,8 @@ FORMAT_FUNCTIONS = {
     "metamath40k": preprocess_metamath,
     "wizardlm70k": preprocess_wizardlm,
     "codefeedback": preprocess_codefeedback,
+    "tuluv3": preprocess_tulu_v3,
+    "mmlu": preprocess_mmlu,
 }
 
 
