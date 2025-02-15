@@ -110,7 +110,7 @@ def eval(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='eval model')
-    parser.add_argument('--base', type=str, default="meta-llama/Llama-2-7b-hf", help='peft_model_name_or_path')
+    parser.add_argument('--base', type=str, default="meta-llama/Llama-2-7b-hf", help='base_model_name_or_path')
     parser.add_argument('--ckpt', type=str, required=True, help='peft_model_name_or_path')
     parser.add_argument('--sparsity_ratio', type=float, default=1.0, help='sparsity_ratio')
     parser.add_argument('--rank', type=int, default=0, help='lora rank')
