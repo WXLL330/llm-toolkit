@@ -7,16 +7,21 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from llmtoolkit import (
     evaluate_JIT,
     safe_dict2file,
+    print_rank_0,
 )
 from llmtoolkit.sqalora.model import SQALoraModel
 
 
 def eval_sqalora(pretrained_model_name_or_path, peft_model_name_or_path, task):
+    dmap = "cuda"
+    if "Mixtral" in pretrained_model_name_or_path:
+        dmap = "auto"
+
     pretrained_model_kwargs = {
         "pretrained_model_name_or_path": pretrained_model_name_or_path,
         "attn_implementation": "flash_attention_2",
         "torch_dtype": torch.bfloat16,
-        "device_map": "cuda",
+        "device_map": dmap,
     }
     model = AutoModelForCausalLM.from_pretrained(**pretrained_model_kwargs)
     tokenizer = AutoTokenizer.from_pretrained(peft_model_name_or_path)
@@ -25,6 +30,8 @@ def eval_sqalora(pretrained_model_name_or_path, peft_model_name_or_path, task):
     model = SQALoraModel.from_pretrained(
         model=model, sqalora_model_name_or_path=peft_model_name_or_path
     )
+    sparsity_ratio = model.calculate_sparsity()
+    print_rank_0(f"current sparse ratio is {sparsity_ratio * 100}%")
 
     model.eval()
     acc = evaluate_JIT(task, model, tokenizer)

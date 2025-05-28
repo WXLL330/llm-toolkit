@@ -234,7 +234,7 @@ class SQALoraModel(nn.Module):
     def calculate_sparsity(self, eps=1e-4) -> float:
         rates = []
         for name, module in self.model.named_modules():
-            if isinstance(module, torch.nn.Linear):
+            if isinstance(module, torch.nn.Linear) and "lora_" not in name:
                 weight = module.weight.data
                 num_zeros = torch.sum(torch.abs(weight) < eps).item()
                 total = weight.numel()

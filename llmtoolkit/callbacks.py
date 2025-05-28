@@ -15,6 +15,16 @@ from .utils import (
     save_fig,
 )
 
+from .sparse import (
+    prune_magnitude,
+)
+
+from .sqalora.model import(
+    SQALoraModel,
+)
+
+from peft import PeftModel
+
 
 class EmptycacheCallback(transformers.TrainerCallback):
     def on_step_begin(self, args, state, control, **kwargs):
@@ -333,5 +343,8 @@ class SparseCallbackBase(transformers.TrainerCallback):
     def on_step_begin(self, args, state, control, **kwargs):
         step = state.global_step
         if step in self.sparse_schedule:
-            self.model.prune(sparsity_ratio = self.sparse_schedule[step], sparse_prune_largest = self.sparse_prune_largest)
-            print_rank_0("sparsity", self.model.calculate_sparsity())
+            if isinstance(self.model, SQALoraModel):
+                self.model.prune(sparsity_ratio = self.sparse_schedule[step], sparse_prune_largest = self.sparse_prune_largest)
+                print_rank_0("sparsity", self.model.calculate_sparsity())
+            elif isinstance(self.model, PeftModel):
+                prune_magnitude(self.model, sparsity_ratio=self.sparse_schedule[step], sparse_prune_largest=self.sparse_prune_largest)

@@ -242,9 +242,11 @@ def get_accelerate_model(
         "attn_implementation": attn_implementation,
         "torch_dtype": compute_dtype,
     }
-    if parallelism == "dp":
-        pretrained_model_kwargs.update({"device_map": "cuda"})
-    elif parallelism == "pp":
+    # if parallelism == "dp":
+    #     pretrained_model_kwargs.update({"device_map": "cuda"})
+    # elif parallelism == "pp":
+    #     pretrained_model_kwargs.update({"device_map": "auto"})
+    if parallelism == "pp":
         pretrained_model_kwargs.update({"device_map": "auto"})
 
     if quant:

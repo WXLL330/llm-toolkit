@@ -42,9 +42,14 @@ def resize_base_model_and_replace_lmhead_embed_tokens(
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # 1. Load the base model, adapter model, and adapter config
+    # model = AutoModelForCausalLM.from_pretrained(
+    #     base_model_name_or_path, torch_dtype=torch.bfloat16
+    # ).to(device)
     model = AutoModelForCausalLM.from_pretrained(
-        base_model_name_or_path, torch_dtype=torch.bfloat16
-    ).to(device)
+        base_model_name_or_path, torch_dtype=torch.bfloat16, device_map="auto",
+        max_memory={i: "35GiB" for i in range(4)},
+        offload_folder=None  # 禁用卸载到磁盘
+    )
     adapter_model = load_file(f"{peft_model_name_or_path}/adapter_model.safetensors")
     with open(
         f"{peft_model_name_or_path}/adapter_config.json", encoding="utf-8"

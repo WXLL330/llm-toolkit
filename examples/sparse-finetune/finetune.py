@@ -1,10 +1,11 @@
+import os
 import argparse
 
 import torch
 
 from llmtoolkit import (
     PEFTConfig,
-    QuantConfig,
+    # QuantConfig,
     build_data_module,
     get_accelerate_model,
     get_args,
@@ -13,17 +14,23 @@ from llmtoolkit import (
     train,
 )
 
+#if "LOCAL_RANK" in os.environ:
+#    local_rank = int(os.environ["LOCAL_RANK"])
+#    torch.cuda.set_device(local_rank)  # 关键：强制绑定 GPU
+#    print(f"Process {local_rank} is using GPU {torch.cuda.current_device()}")
+#else:
+#    print("Single-process training")
 
 model_args, data_args, training_args = get_args()
 
 if model_args.quant:
-    quant_config = QuantConfig(
-        quant_method=model_args.quant,
-        model_bits=model_args.bits,
-        bnb_quant_type=model_args.quant_type,
-    )
+    quant=True
+    quant_method=model_args.quant_method
+    # pass
 else:
-    quant_config = None
+    # quant_config = None
+    quant=False
+    quant_method=None
 
 if model_args.peft:
     peft_config = PEFTConfig(
@@ -32,6 +39,7 @@ if model_args.peft:
         lora_rank=model_args.lora_rank,
         lora_scale=model_args.lora_scale,
         init_lora_weights=model_args.init_lora_weights,
+        sparse_preserve_mode=0
     )
 else:
     peft_config = None
@@ -40,8 +48,9 @@ args = argparse.Namespace(**vars(model_args), **vars(data_args), **vars(training
 
 model, tokenizer = get_accelerate_model(
     args.model_name_or_path,
-    quant_config,
-    peft_config,
+    quant=model_args.quant,
+    quant_method=model_args.quant_method,
+    peft_config=peft_config,
     flash_attn=args.flash_attn,
     compute_dtype=torch.bfloat16,
     parallelism=args.parallelism,
