@@ -9,7 +9,7 @@ from typing import Any
 import bitsandbytes as bnb
 import torch
 import torch.nn as nn
-from safetensors.torch import load_file, load_model, save_model
+from safetensors.torch import load_file, save_file
 from tqdm import tqdm
 from transformers.pytorch_utils import Conv1D
 
@@ -47,10 +47,12 @@ class SQALoraModel(nn.Module):
         super().__init__()
         self.model = model
         self.sqalora_config = sqalora_config
+        self.dynamic_quantization_config = sqalora_config.dynamic_quantization_config
         self.targeted_module_names: list[str] = []
         self.inject_adapter(self.model, sqalora_config)
         if self.sqalora_config.quantization:
             self.quantize()
+        self.modules_to_save = (nn.Linear, nn.Embedding, bnb.nn.Linear4bit, bnb.nn.Linear8bitLt)
 
     def forward(self, *args: Any, **kwargs: Any):
         return self.model.forward(*args, **kwargs)
@@ -79,6 +81,10 @@ class SQALoraModel(nn.Module):
         parent,
     ):
         r = sqalora_config.r
+        quant_method = next(
+            (cfg for k, cfg in (self.dynamic_quantization_config or {}).items() if target_name in k),
+            sqalora_config.quant_method
+        )
         kwargs = {
             "r": r,
             "lora_alpha": sqalora_config.lora_alpha,
@@ -88,7 +94,7 @@ class SQALoraModel(nn.Module):
             "use_rslora": sqalora_config.use_rslora,
             "lora_bias": sqalora_config.lora_bias,
             "sparse_preserve_mode": sqalora_config.sparse_preserve_mode,
-            "quant_method": sqalora_config.quant_method,
+            "quant_method": quant_method,
             "loaded_in_8bit": getattr(self.model, "is_loaded_in_8bit", False),
             "loaded_in_4bit": getattr(self.model, "is_loaded_in_4bit", False),
         }
@@ -214,19 +220,21 @@ class SQALoraModel(nn.Module):
                 )
 
     def quantize(self):
-        #TODO: check if the model is on GPU
+        # TODO: check if the model is on GPU
         if self.device == "cpu" or self.model.device == "cpu":
-            print_rank_0("You are tring to quantize the model on cpu, which may cause errors. We recommend to quantize the model on GPU.")
+            print_rank_0(
+                "You are tring to quantize the model on cpu, which may cause errors. We recommend to quantize the model on GPU."
+            )
         for name, module in self.model.named_modules():
             if isinstance(module, Linear):
-                print_rank_0(f"Quantizing layer - {name}")
+                print_rank_0(f"Quantizing layer - {name} to {module.quant_method}")
                 module.quantize()
         self.sqalora_config.quantization = True
 
     def dequantize(self):
         for name, module in self.model.named_modules():
             if isinstance(module, Linear):
-                print_rank_0(f"Dequantizing layer - {name}")
+                print_rank_0(f"Dequantizing layer - {name} from {module.quant_method}")
                 module.dequantize()
         self.sqalora_config.quantization = False
 
@@ -243,12 +251,81 @@ class SQALoraModel(nn.Module):
             return 0.0
         return sum(rates) / len(rates)
 
+    def collect_tensors_to_save(self, prefix: str = "") -> dict[str, torch.Tensor]:
+        tensors: dict[str, torch.Tensor] = {}
+        seen_ptr: set[int] = set()
+
+        for module_name, module in self.named_modules():
+            if isinstance(module, self.modules_to_save):
+                for param_name, param_tensor in module.state_dict().items():
+                    key = f"{prefix}{module_name}.{param_name}" if module_name else f"{prefix}{param_name}"
+                    tensors[key] = param_tensor.detach().cpu()
+        for name in tensors.keys():
+            print_rank_0(f"Collecting {name} to save.")
+
+        return tensors
+
+    @staticmethod
+    def handle_weight(model: SQALoraModel, state_dict: dict[str, torch.Tensor]):
+        for name, module in model.named_modules():
+            module_weight_name = f"{name}.weight"
+            if isinstance(module, bnb.nn.Linear4bit):
+                print_rank_0(f"Loading weight to {module_weight_name}")
+                weight = state_dict[module_weight_name]
+                if weight.dtype in (torch.bfloat16, torch.float16, torch.float32):
+                    module.weight = bnb.nn.Params4bit(
+                        weight,
+                        requires_grad=False,
+                        quant_type=module.quant_state.quant_type,
+                    ).to(module.weight.device)
+                elif weight.dtype in (torch.uint8, torch.int8):
+                    quantized_stats = {}
+                    for k, v in state_dict.items():
+                        if module_weight_name + "." in k:
+                            quantized_stats[k] = v
+
+                    new_value = bnb.nn.Params4bit.from_prequantized(
+                        data=weight,
+                        quantized_stats=quantized_stats,
+                        requires_grad=False,
+                        device=module.weight.device,
+                    )
+                    module.weight = new_value
+            elif isinstance(module, bnb.nn.Linear8bitLt):
+                print_rank_0(f"Loading weight to {module_weight_name}")
+                weight = state_dict[module_weight_name]
+                if weight.dtype in (torch.bfloat16, torch.float16, torch.float32):
+                    module.weight = bnb.nn.Int8Params(
+                        weight,
+                        requires_grad=False,
+                    ).to(module.weight.device)
+                elif weight.dtype is torch.int8:
+                    module.weight = bnb.nn.Int8Params(
+                        data = weight,
+                        SCB = state_dict[name + ".SCB"],
+                        requires_grad=False,
+                    ).to(module.weight.device)
+            elif isinstance(module, (nn.Linear, nn.Embedding)):
+                try:
+                    module.weight.copy_(state_dict[module_weight_name])
+                    print_rank_0(f"Loading weight to {module_weight_name}")
+                except KeyError:
+                    print_rank_0(f"Cannot find {module_weight_name} in state_dict.")
+                continue
+            else:
+                # since the module is not nn.Linear or nn.Embedding or bnb.nn.Linear4bit, we don't need to handle it
+                continue
+
     @torch.no_grad()
     def save_pretrained(self, save_directory: str) -> None:
+        """
+        sqalora_model.safetensors should only contains the weights of the all linears.
+        """
         if not os.path.exists(save_directory):
             os.makedirs(save_directory, exist_ok=True)
         model_path = os.path.join(save_directory, "sqalora_model.safetensors")
-        save_model(self, model_path)
+        tensors = self.collect_tensors_to_save()
+        save_file(tensors, model_path)
         self.sqalora_config.save_pretrained(save_directory)
 
     @classmethod
@@ -259,6 +336,12 @@ class SQALoraModel(nn.Module):
         sqalora_model_name_or_path: str,
         **kwargs,
     ) -> SQALoraModel:
+        """
+        Load a SQALoraModel from path.
+        1. Load the SQALoraConfig.
+        2. construct the SQALoraModel based on SQALoraConfig and model.
+        3. should only replace the xx modules from ckpt to the model.
+        """
         sqalora_config = SQALoraConfig.from_pretrained(sqalora_model_name_or_path)
         sqalora_model = cls(model, sqalora_config)
 
@@ -267,6 +350,7 @@ class SQALoraModel(nn.Module):
             raise FileNotFoundError(f"Cannot find sqalora_model.safetensors in {safetensors_path}")
         state_dict = load_file(safetensors_path)
 
+        # TODO: refactor this part, construct the WL and WR when init the sqalora_model
         # process WL and WR
         for full_key in list(state_dict.keys()):
             if ".WL." not in full_key and ".WR." not in full_key:
@@ -301,21 +385,23 @@ class SQALoraModel(nn.Module):
                 lr_dict.update({step_name: new_linear})
 
         # missing, unexpected = sqalora_model.load_state_dict(state_dict, strict=False)
-        missing, unexpected = load_model(sqalora_model, safetensors_path, strict=False)
-        if len(unexpected) > 0:
-            warnings.warn(f"there are {len(unexpected)} parameters that unexpected: {list(unexpected)[:10]} ...")
-        if len(missing) > 0:
-            warnings.warn(f"there are {len(missing)} parameters that missing: {list(missing)[:10]} ...")
-        #TODO: check here, the expect output is:
+        # missing, unexpected = load_model(sqalora_model, safetensors_path, strict=False)
+        # if len(unexpected) > 0:
+        #     warnings.warn(f"there are {len(unexpected)} parameters that unexpected: {list(unexpected)[:10]} ...")
+        # if len(missing) > 0:
+        #     warnings.warn(f"there are {len(missing)} parameters that missing: {list(missing)[:10]} ...")
+        # TODO: check here, the expect output is:
         # unexpected only contains the quant_state, such as .absmax, .nested_absmax, .nested_quant_map, .quant_map, .quant_state.bitsandbytes__nf4
         # missing is empty
 
-        quant_method = sqalora_config.quant_method.lower()
-        _quant_load_handlers = {
-            "nf4": cls._load_nf4_weights,
-        }
-        handler_fn = _quant_load_handlers[quant_method]
-        handler_fn(sqalora_model, state_dict)
+        # quant_method = sqalora_config.quant_method.lower()
+        # _quant_load_handlers = {
+        #     "nf4": cls._load_nf4_weights,
+        # }
+        # handler_fn = _quant_load_handlers[quant_method]
+        # handler_fn(sqalora_model, state_dict)
+
+        cls.handle_weight(sqalora_model, state_dict)
 
         return sqalora_model
 
@@ -359,7 +445,6 @@ class SQALoraModel(nn.Module):
                         for k, v in state_dict.items():
                             if base_layer_name + "." in k:
                                 quantized_stats[k] = v
-                        print_rank_0(quantized_stats.keys())
 
                         new_value = bnb.nn.Params4bit.from_prequantized(
                             data=param_value,

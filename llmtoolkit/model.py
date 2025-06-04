@@ -5,10 +5,12 @@ from typing import Optional
 import bitsandbytes as bnb
 import torch
 import transformers
+from hqq.core.quantize import HQQLinear
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
     BitsAndBytesConfig,
+    HqqConfig,
 )
 from transformers.pytorch_utils import Conv1D
 
@@ -40,13 +42,9 @@ def auto_add_special_tokens(model, tokenizer):
     if tokenizer.pad_token is None:
         special_tokens_dict["pad_token"] = "<|reserved_special_token_100|>"
     if tokenizer.eos_token is None:
-        special_tokens_dict["eos_token"] = tokenizer.convert_ids_to_tokens(
-            model.config.eos_token_id
-        )
+        special_tokens_dict["eos_token"] = tokenizer.convert_ids_to_tokens(model.config.eos_token_id)
     if tokenizer.bos_token is None:
-        special_tokens_dict["bos_token"] = tokenizer.convert_ids_to_tokens(
-            model.config.bos_token_id
-        )
+        special_tokens_dict["bos_token"] = tokenizer.convert_ids_to_tokens(model.config.bos_token_id)
     if tokenizer.unk_token is None:
         special_tokens_dict["unk_token"] = "<|reserved_special_token_101|>"
 
@@ -62,7 +60,7 @@ def auto_add_special_tokens(model, tokenizer):
 
 
 def find_all_linear_names(model):
-    linear_cls = (bnb.nn.Linear4bit, bnb.nn.Linear8bitLt, torch.nn.Linear)
+    linear_cls = (bnb.nn.Linear4bit, bnb.nn.Linear8bitLt, torch.nn.Linear, HQQLinear)
     conv1d_cls = Conv1D
     lora_module_names = set()
     for name, module in model.named_modules():
@@ -104,22 +102,14 @@ def peft_model(
         if lora_modules == "all":
             pass
         elif lora_modules == "attention":
-            modules = [
-                s for s in modules if any(module in s for module in attention_modules)
-            ]
+            modules = [s for s in modules if any(module in s for module in attention_modules)]
         elif lora_modules == "mlp":
-            modules = [
-                s
-                for s in modules
-                if all(module not in s for module in attention_modules)
-            ]
+            modules = [s for s in modules if all(module not in s for module in attention_modules)]
         else:
             target_modules = lora_modules.split(",")
             for m in target_modules:
                 if m not in modules:
-                    raise ValueError(
-                        f"You must choose your lora modules from {modules}."
-                    )
+                    raise ValueError(f"You must choose your lora modules from {modules}.")
             modules = target_modules
         print_rank_0(f"adding LoRA modules to {modules}")
 
@@ -130,10 +120,8 @@ def peft_model(
                 target_modules=modules,
                 bias="none",
                 task_type="CAUSAL_LM",
-                init_lora_weights=init_lora_weights
-                if init_lora_weights is not None
-                else True,
-                eva_config = EvaConfig(rho = 2.0) if init_lora_weights == "eva" else None,
+                init_lora_weights=init_lora_weights if init_lora_weights is not None else True,
+                eva_config=EvaConfig(rho=2.0) if init_lora_weights == "eva" else None,
             )
             _peft_model = get_peft_model(model, config)
         elif peft_method == "lorafa":
@@ -143,10 +131,8 @@ def peft_model(
                 target_modules=modules,
                 bias="none",
                 task_type="CAUSAL_LM",
-                init_lora_weights=init_lora_weights
-                if init_lora_weights is not None
-                else True,
-                eva_config = EvaConfig(rho = 2.0) if init_lora_weights == "eva" else None,
+                init_lora_weights=init_lora_weights if init_lora_weights is not None else True,
+                eva_config=EvaConfig(rho=2.0) if init_lora_weights == "eva" else None,
             )
             _peft_model = get_peft_model(model, config)
             for name, param in _peft_model.named_parameters():
@@ -179,13 +165,14 @@ def peft_model(
             _peft_model = get_peft_model(model, config)
         elif peft_method == "sqalora":
             from .sqalora import SQALoraConfig, SQALoraModel
+
             config = SQALoraConfig(
                 r=lora_rank,
                 lora_alpha=int(lora_scale * lora_rank),
                 target_modules=modules,
                 init_lora_weights=init_lora_weights if init_lora_weights is not None else True,
-                sparse_preserve_mode = sparse_preserve_mode,
-                quant_method = quant_method,
+                sparse_preserve_mode=sparse_preserve_mode,
+                quant_method=quant_method,
             )
             _peft_model = SQALoraModel(model, config)
     elif peft_method == "prefix":
@@ -242,11 +229,11 @@ def get_accelerate_model(
         "attn_implementation": attn_implementation,
         "torch_dtype": compute_dtype,
     }
-    # if parallelism == "dp":
-    #     pretrained_model_kwargs.update({"device_map": "cuda"})
-    # elif parallelism == "pp":
-    #     pretrained_model_kwargs.update({"device_map": "auto"})
-    if parallelism == "pp":
+    if parallelism == "dp":
+        # TODO: check if load the model on the first GPU is ok when there is a acceletate prepare later
+        # pretrained_model_kwargs.update({"device_map": "cuda:0"})
+        pass
+    elif parallelism == "pp":
         pretrained_model_kwargs.update({"device_map": "auto"})
 
     if quant:
@@ -277,7 +264,23 @@ def get_accelerate_model(
             )
             pass
         elif quant_method == "hqq4":
-            raise ValueError(f"Unsupported quantization method {quant_method}")
+            quant_config = HqqConfig(nbits=4, group_size=64)
+            pretrained_model_kwargs.update({"quantization_config": quant_config})
+        elif quant_method == "hqq8+4":
+            q4_config = {"nbits": 4, "group_size": 64}
+            q8_config = {"nbits": 8, "group_size": 64}
+            quant_config = HqqConfig(
+                dynamic_config={
+                    "self_attn.q_proj": q4_config,
+                    "self_attn.k_proj": q4_config,
+                    "self_attn.v_proj": q4_config,
+                    "self_attn.o_proj": q4_config,
+                    "mlp.gate_proj": q8_config,
+                    "mlp.up_proj": q4_config,
+                    "mlp.down_proj": q4_config,
+                }
+            )
+            pretrained_model_kwargs.update({"quantization_config": quant_config})
         else:
             raise ValueError(f"Unsupported quantization method {quant_method}")
     else:
@@ -290,9 +293,7 @@ def get_accelerate_model(
     print_rank_0(f"Loading base model from {model_name_or_path}.")
     model = AutoModelForCausalLM.from_pretrained(**pretrained_model_kwargs)
 
-    if compute_dtype == torch.float16 and (
-        is_ipex_available() and torch.xpu.is_available()
-    ):
+    if compute_dtype == torch.float16 and (is_ipex_available() and torch.xpu.is_available()):
         compute_dtype = torch.bfloat16
         print_rank_0("Intel XPU does not support float16 yet, so switching to bfloat16")
 
@@ -310,9 +311,7 @@ def get_accelerate_model(
     auto_add_special_tokens(model, tokenizer)
 
     if quant:
-        model = prepare_model_for_kbit_training(
-            model, use_gradient_checkpointing=gradient_checkpointing
-        )
+        model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=gradient_checkpointing)
 
     if peft_config:
         model = peft_model(
@@ -329,25 +328,13 @@ def get_accelerate_model(
         if flash_attn or deepspeed is not None:
             for name, module in model.named_modules():
                 if isinstance(module, LoraLayer):
-                    module = module.to(
-                        torch.float16
-                        if compute_dtype == torch.float16
-                        else torch.bfloat16
-                    )
+                    module = module.to(torch.float16 if compute_dtype == torch.float16 else torch.bfloat16)
                 if "norm" in name:
-                    module = module.to(
-                        torch.float16
-                        if compute_dtype == torch.float16
-                        else torch.bfloat16
-                    )
+                    module = module.to(torch.float16 if compute_dtype == torch.float16 else torch.bfloat16)
                 if "lm_head" in name or "embed_tokens" in name:
                     if hasattr(module, "weight"):
                         if module.weight.dtype == torch.float32:
-                            module = module.to(
-                                torch.float16
-                                if compute_dtype == torch.float16
-                                else torch.bfloat16
-                            )
+                            module = module.to(torch.float16 if compute_dtype == torch.float16 else torch.bfloat16)
 
     if hasattr(model, "enable_input_require_grads"):
         model.enable_input_require_grads()
@@ -375,6 +362,19 @@ def print_trainable_parameters(model, debug=False):
     )
     return (trainable_params, all_param, 100 * trainable_params / all_param)
 
+def print_linear_parameters(model, debug=False):
+    linear_params = 0
+    all_param = 0
+    for name, param in model.named_parameters():
+        all_param += param.numel()
+        if isinstance(param, (torch.nn.Linear, bnb.nn.Linear4bit, bnb.nn.Linear8bitLt)):
+            if debug:
+                print_rank_0(f"{name} is linear")
+            linear_params += param.numel()
+    print_rank_0(
+        f"linear params: {linear_params} || all params: {all_param} || linear%: {100 * linear_params / all_param:.2f}"
+    )
+    return (linear_params, all_param, 100 * linear_params / all_param)
 
 # deprecate
 
@@ -386,9 +386,7 @@ def get_last_checkpoint(checkpoint_dir):
             return None, True  # already finished
         max_step = 0
         for filename in os.listdir(checkpoint_dir):
-            if isdir(join(checkpoint_dir, filename)) and filename.startswith(
-                "checkpoint"
-            ):
+            if isdir(join(checkpoint_dir, filename)) and filename.startswith("checkpoint"):
                 max_step = max(max_step, int(filename.replace("checkpoint-", "")))
         if max_step == 0:
             return None, is_completed  # training started, but no checkpoint
