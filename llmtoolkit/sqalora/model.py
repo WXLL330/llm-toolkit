@@ -313,6 +313,7 @@ class SQALoraModel(nn.Module):
         quant_method = sqalora_config.quant_method.lower()
         _quant_load_handlers = {
             "nf4": cls._load_nf4_weights,
+            "mxfp4": cls._load_mxfp4_weights,
         }
         handler_fn = _quant_load_handlers[quant_method]
         handler_fn(sqalora_model, state_dict)
@@ -372,6 +373,61 @@ class SQALoraModel(nn.Module):
                         raise ValueError(
                             "The dtype of base layer and it's state in state_dict must in [torch.bfloat16, torch.uint8]."
                         )
+    
+    @staticmethod
+    def _load_mxfp4_weights(model: SQALoraModel, state_dict: dict[str, torch.Tensor]):
+        for name, module in model.named_modules():
+            if isinstance(module, Linear):
+                base_layer = module.get_base_layer()
+                base_layer_name = _get_module_name(model, base_layer)
+                base_layer_name = f"{base_layer_name}.weight"
+                if base_layer_name in state_dict:
+                    print_rank_0(f"Loading weight to {base_layer_name}")
+                    param_value = state_dict[base_layer_name]
+                    param_dtype = param_value.dtype
+                    target_device = base_layer.weight.device
+                    target_dtype = base_layer.weight.dtype
+
+                    # print(f"saved dtype={param_dtype}, target dtype={target_dtype}")
+                    if target_dtype == torch.bfloat16 and param_dtype == torch.bfloat16:
+                        base_layer.weight.copy_(param_value)
+                    # elif target_dtype == torch.bfloat16 and param_dtype == torch.uint8:
+                    #     module.quantize()
+                    #     quantized_stats = {}
+                    #     for k, v in state_dict.items():
+                    #         if base_layer_name + "." in k:
+                    #             quantized_stats[k] = v
+                    #     new_value = bnb.nn.Params4bit.from_prequantized(
+                    #         data=param_value,
+                    #         quantized_stats=quantized_stats,
+                    #         requires_grad=False,
+                    #         device=target_device,
+                    #     )
+                    #     base_layer.weight = new_value
+                    # elif target_dtype == torch.uint8 and param_dtype == torch.bfloat16:
+                    #     base_layer.weight = bnb.nn.Params4bit(
+                    #         param_value,
+                    #         requires_grad=False,
+                    #         quant_type="nf4",
+                    #     ).to(target_device)
+                    # elif target_dtype == torch.uint8 and param_dtype == torch.uint8:
+                    #     quantized_stats = {}
+                    #     for k, v in state_dict.items():
+                    #         if base_layer_name + "." in k:
+                    #             quantized_stats[k] = v
+                    #     print_rank_0(quantized_stats.keys())
+
+                    #     new_value = bnb.nn.Params4bit.from_prequantized(
+                    #         data=param_value,
+                    #         quantized_stats=quantized_stats,
+                    #         requires_grad=False,
+                    #         device=target_device,
+                    #     )
+                    #     base_layer.weight = new_value
+                    # else:
+                    #     raise ValueError(
+                    #         "The dtype of base layer and it's state in state_dict must in [torch.bfloat16, torch.uint8]."
+                    #     )
 
     # TODO
     def _unload_and_optionally_merge(

@@ -84,9 +84,9 @@ def transformers_inference(
             generated_ids = raw_model.generate(
                 **encoded_prompts,
                 max_new_tokens=max_tokens,
-                top_p=0.0,
-                temperature=0.1,
-                do_sample=True,
+                top_p=0.1,
+                temperature=0.0,
+                do_sample=False,
                 pad_token_id=tokenizer.pad_token_id,
                 eos_token_id=tokenizer.eos_token_id,
             )

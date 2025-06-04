@@ -14,6 +14,8 @@ from .utils import (
     mergeW2AB,
 )
 
+import mx
+
 
 """
 sparse_preserve_mode
@@ -414,6 +416,32 @@ class Linear(SQALoraLayer):
             raise ValueError("Not support yet.")
         elif self.quant_method == "hqq":
             raise ValueError("Not support yet.")
+        elif self.quant_method == "mxfp4":
+            device = self.base_layer.weight.device
+            weight_bf16 = self.base_layer.weight.detach().to(compute_dtype).contiguous()
+            bias = None if self.base_layer.bias is None else self.base_layer.bias.detach().clone()
+
+            mx_specs = {
+                'scale_bits': 8,
+                'w_elem_format': 'fp4_e2m1',
+                # 'a_elem_format': 'fp4_e2m1',
+                'block_size': 32,
+                'bfloat': 16,
+                'custom_cuda': True,
+                # For quantization-aware finetuning, do backward pass in FP32
+                'quantize_backprop': False,
+            }
+            mx_specs = mx.finalize_mx_specs(mx_specs)
+
+            qlinear = mx.Linear(
+                self.in_features, self.out_features,
+                bias=bias is not None,
+                mx_specs=mx_specs
+            )
+            qlinear.weight = self.base_layer.weight
+
+            self.base_layer = qlinear
+            self.quantized = True
         else:
             raise ValueError("Only nf4, fp4, hqq are supported.")
 
@@ -453,6 +481,8 @@ class Linear(SQALoraLayer):
             raise ValueError("Not support yet.")
         elif self.quant_method == "hqq":
             raise ValueError("Not support yet.")
+        elif self.quant_method == "mxfp4":
+            raise ValueError("Not support yet")
         else:
             raise ValueError("Only nf4, fp4, hqq are supported.")
 
