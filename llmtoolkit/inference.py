@@ -1,3 +1,4 @@
+
 import torch
 from accelerate import Accelerator
 from tqdm import tqdm
@@ -37,19 +38,21 @@ def transformers_inference(
     peft_name_or_path: str = None,
     max_lora_rank: int = 128,
     max_tokens: int = 1024,
-    load_in_4bit: bool = False,
+    quant_method: str = None,
     batch_size: int = 1,
     model = None,
     tokenizer = None,
 ) -> list:
+
     if not model or not tokenizer:
         model, tokenizer = load(
             base_model_name_or_path=model_name_or_path,
             peft_model_name_or_path=peft_name_or_path,
-            load_in_4bit=load_in_4bit,
+            quant_method=quant_method,
         )
     model.eval()
     accelerator = Accelerator()
+    model = accelerator.prepare(model)
     tokenizer.padding_side = "left"
 
     prompts_with_lengths = [(i, prompt, len(tokenizer.tokenize(prompt))) for i, prompt in enumerate(prompts)]
@@ -59,12 +62,8 @@ def transformers_inference(
 
     all_predictions = [None] * len(prompts)
 
-    print(tokenizer.pad_token_id)
-    print(tokenizer.eos_token_id)
-    print(tokenizer.decode([tokenizer.eos_token_id]))
-
     num_batches = (len(sorted_prompts) + batch_size - 1) // batch_size
-    for batch_idx in tqdm(range(num_batches), desc="Inference Progress"):
+    for batch_idx in tqdm(range(num_batches), desc="Inference Progress") if accelerator.is_main_process else range(num_batches):
         if batch_idx % accelerator.num_processes != accelerator.process_index:
             continue
 
@@ -89,6 +88,7 @@ def transformers_inference(
                 do_sample=False,
                 pad_token_id=tokenizer.pad_token_id,
                 eos_token_id=tokenizer.eos_token_id,
+                use_cache=True,
             )
         input_ids = encoded_prompts["input_ids"]
         generated_outputs = []
@@ -107,7 +107,6 @@ def transformers_inference(
         return predictions
     else:
         return None
-
 
 @rank_0
 def single_inference(
@@ -156,7 +155,7 @@ def vllm_inference(
     peft_name_or_path: str = None,
     max_lora_rank: int = 128,
     max_tokens: int = 1024,
-    load_in_4bit: bool = False,
+    quant_method: str = None,
 ) -> list:
     require_lib("vllm")
     import torch
@@ -170,9 +169,9 @@ def vllm_inference(
             'WARNING: 2 or more gpus are detected, and VLLM will use all gpus to inference. However, a RuntimeError may raised: "An attempt has been made to start a new process before the current process ...". To avoid this error, wrap your code within " if __name__ == "__main__": ". This is a bug in VLLM, an expected behavior when tp >= 2 & ray. For more info please refer to https://github.com/vllm-project/vllm/pull/5669.'
         )
 
-    if load_in_4bit:
+    if quant_method:
         print_rank_0(
-            "For now we only support bitsandbytes quantization for load_in_4bit. This may cause slow inference speed and high GPU memory consumption compared to un-quantized inference. You may consider to decrease the gpu_memory_utilization to avoid OOM. Current gpu_memory_utilization is set to 0.9."
+            "For now we only support bitsandbytes and hqq quantization. This may cause slow inference speed and high GPU memory consumption compared to un-quantized inference. You may consider to decrease the gpu_memory_utilization to avoid OOM. Current gpu_memory_utilization is set to 0.9."
         )
         print_rank_0(
             "WARNING: Please note that no-supprt for bitsandbytes quantization with TP. For more info please refer to https://github.com/vllm-project/vllm/discussions/10117."
@@ -184,8 +183,13 @@ def vllm_inference(
         "tensor_parallel_size": gsi.info["n_gpus"],
         "gpu_memory_utilization": 0.9,
     }
-    if load_in_4bit:
-        vllm_kwargs.update({"quantization": "bitsandbytes", "load_format": "bitsandbytes"})
+    if quant_method:
+        if quant_method == "nf4":
+            vllm_kwargs.update({"quantization": "bitsandbytes", "load_format": "bitsandbytes"})
+        elif quant_method == "hqq4":
+            vllm_kwargs.update({"quantization": "hqq"})
+        else:
+            raise ValueError(f"Unsupported quantization method: {quant_method}. Supported methods are 'nf4' and 'hqq4'.")
     if peft_name_or_path:
         vllm_kwargs.update({"enable_lora": True, "max_lora_rank": max_lora_rank})
 
@@ -208,7 +212,7 @@ def batched_inference(
     peft_name_or_path: str = None,
     max_lora_rank: int = 128,
     max_tokens: int = 1024,
-    load_in_4bit: bool = False,
+    quant_method: str = None,
     backend: InferBackend = InferBackend.VLLM,
 ) -> list:
     if backend == InferBackend.TRANSFORMERS:
@@ -218,7 +222,7 @@ def batched_inference(
             peft_name_or_path=peft_name_or_path,
             max_lora_rank=max_lora_rank,
             max_tokens=max_tokens,
-            load_in_4bit=load_in_4bit,
+            quant_method=quant_method,
         )
     elif backend == InferBackend.VLLM:
         return vllm_inference(
@@ -227,7 +231,7 @@ def batched_inference(
             peft_name_or_path=peft_name_or_path,
             max_lora_rank=max_lora_rank,
             max_tokens=max_tokens,
-            load_in_4bit=load_in_4bit,
+            quant_method=quant_method,
         )
         pass
     elif backend == InferBackend.SGLANG:
