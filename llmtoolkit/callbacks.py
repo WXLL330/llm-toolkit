@@ -337,7 +337,8 @@ class SparseCallbackBase(transformers.TrainerCallback):
         if self.SQAT:
             print_rank_0("Sparse-Quantization-Aware Training is triggered, on step 0 the unquantized model will be sparsed, then it will be quantized the whole training session.")
             sparsity4step0 = self.sparse_schedule.pop(min(self.sparse_schedule.keys()))
-            self.model.prune(sparsity_ratio = sparsity4step0, sparse_prune_largest = self.sparse_prune_largest)
+            if sparsity4step0 != 0:
+                self.model.prune(sparsity_ratio = sparsity4step0, sparse_prune_largest = self.sparse_prune_largest)
             self.model.quantize()
 
     def on_step_begin(self, args, state, control, **kwargs):

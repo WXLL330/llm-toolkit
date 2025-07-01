@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import time
 import warnings
 from dataclasses import asdict
 from enum import Enum
@@ -43,7 +44,12 @@ def _get_module(root: nn.Module, path: str) -> nn.Module:
 class SQALoraModel(nn.Module):
     prefix: str = "lora_"
 
-    def __init__(self, model, sqalora_config) -> None:
+    def __init__(
+            self, 
+            model, 
+            sqalora_config, 
+            # inference_mode: bool = False
+    ) -> None:
         super().__init__()
         self.model = model
         self.sqalora_config = sqalora_config
@@ -225,17 +231,46 @@ class SQALoraModel(nn.Module):
             print_rank_0(
                 "You are tring to quantize the model on cpu, which may cause errors. We recommend to quantize the model on GPU."
             )
+        
+        g_start_q = time.perf_counter()
+        acc_time = 0
         for name, module in self.model.named_modules():
             if isinstance(module, Linear):
                 print_rank_0(f"Quantizing layer - {name} to {module.quant_method}")
+                layer_start = time.perf_counter()
                 module.quantize()
+                layer_end = time.perf_counter()
+                print_rank_0(f"Quantizing layer - {name} takes {layer_end-layer_start:.3f} seconds")
+                acc_time += layer_end - layer_start
+        
+        g_end_q = time.perf_counter()
+        print_rank_0(f"Total Quantization Time is {g_end_q - g_start_q:.3f} seconds")
+        print_rank_0(f"Pure Quantization Time is {acc_time:.3f} seconds")
         self.sqalora_config.quantization = True
 
     def dequantize(self):
+        torch.cuda.synchronize()
+        g_start_q = time.perf_counter()
+        acc_time = 0.0
+        total_linear = 0
+        quant_linear = 0
+
         for name, module in self.model.named_modules():
             if isinstance(module, Linear):
-                print_rank_0(f"Dequantizing layer - {name} from {module.quant_method}")
-                module.dequantize()
+                if isinstance(module.base_layer, bnb.nn.Linear4bit):
+                    print_rank_0(f"Dequantizing layer - {name} from {module.quant_method}")
+                    module.dequantize()
+                    acc_time += module.dequantization_cost
+                    quant_linear += 1
+                else:
+                    total_linear += 1
+        
+        torch.cuda.synchronize()
+        g_end_q = time.perf_counter()
+
+        print_rank_0(f"Total linear layer: {total_linear}, Quantization linear layer: {quant_linear}")
+        print_rank_0(f"[Total GPU kernel dequant time]: {acc_time:.3f} ms")
+        print_rank_0(f"[Total elapsed time (Python + CUDA)]: {(g_end_q - g_start_q):.3f} s")
         self.sqalora_config.quantization = False
 
     @torch.no_grad()
@@ -334,6 +369,7 @@ class SQALoraModel(nn.Module):
         cls,
         model: nn.Module,
         sqalora_model_name_or_path: str,
+        # inference_mode: bool = True,
         **kwargs,
     ) -> SQALoraModel:
         """

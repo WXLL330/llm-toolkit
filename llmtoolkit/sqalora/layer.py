@@ -1,4 +1,5 @@
 import math
+import time
 import warnings
 from typing import Any, Union
 
@@ -13,7 +14,7 @@ from .utils import (
     transpose,
 )
 
-import mx
+from mx import MXLinearPTQ, finalize_mx_specs
 
 
 """
@@ -392,7 +393,7 @@ class Linear(SQALoraLayer):
             device = self.base_layer.weight.device
             weight_bf16 = self.base_layer.weight.detach().to(compute_dtype).contiguous()
             bias = None if self.base_layer.bias is None else self.base_layer.bias.detach().clone()
-
+            
             qlinear = bnb.nn.Linear4bit(
                 self.in_features,
                 self.out_features,
@@ -462,46 +463,75 @@ class Linear(SQALoraLayer):
             device = self.base_layer.weight.device
             weight_bf16 = self.base_layer.weight.detach().to(compute_dtype).contiguous()
             bias = None if self.base_layer.bias is None else self.base_layer.bias.detach().clone()
-
+            
             mx_specs = {
-                'scale_bits': 8,
-                'w_elem_format': 'fp4_e2m1',
-                # 'a_elem_format': 'fp4_e2m1',
-                'block_size': 32,
-                'bfloat': 16,
-                'custom_cuda': True,
-                # For quantization-aware finetuning, do backward pass in FP32
-                'quantize_backprop': False,
+                "scale_bits": 8,
+                "w_elem_format": "fp4_e2m1",
+                "bfloat": 16,
+                "block_size": 32,
+                "round": "even",
+                "custom_cuda": True,
+                # for QAT, use FP32 for backprop
+                "quantize_backprop": True,
             }
-            mx_specs = mx.finalize_mx_specs(mx_specs)
-
-            qlinear = mx.Linear(
-                self.in_features, self.out_features,
+            mx_specs = finalize_mx_specs(mx_specs)
+            
+            qlinear = MXLinearPTQ(
+                in_features=self.in_features,
+                out_features=self.out_features,
                 bias=bias is not None,
-                mx_specs=mx_specs
-            )
-            qlinear.weight = self.base_layer.weight
+                mx_specs=mx_specs,
+            ).to(device)
+            
+            qlinear.weight = nn.Parameter(weight_bf16.data, requires_grad=False).to(device)
+            if bias is not None:
+                qlinear.bias = nn.Parameter(bias.data, requires_grad=False).to(device)
+            # qlinear.weight.data.copy_(weight_bf16.data)
+            # if bias is not None:
+            #     qlinear.bias.data.copy_(bias.data)
+                
+            qlinear.prequantize_weights()
+
+            # del weight
+            # if bias is not None:
+            #     del bias
 
             self.base_layer = qlinear
             self.quantized = True
         else:
             raise ValueError("Only nf4, fp4, hqq, fp8, mxfp4 are supported.")
+        
+        for name, param in self.base_layer.named_parameters():
+            if param.requires_grad:
+                print(f"Warning: Parameter {name} still has requires_grad=True")
+                param.requires_grad = False
 
     @torch.no_grad()
     def dequantize(
         self,
         compute_dtype: torch.dtype = torch.bfloat16,
     ):
-        if isinstance(self.base_layer, nn.Linear):
-            self.quantized = False
+        # if isinstance(self.base_layer, nn.Linear):
+        #     self.quantized = False
+        #     return
+        if not self.quantized:
             return
         if self.quant_method == "nf4":
             if not isinstance(self.base_layer, bnb.nn.Linear4bit):
                 raise RuntimeError(f"The quantization method is {self.quant_method}, however the type of base_layer is {type(self.base_layer)}.")
 
+            start_event = torch.cuda.Event(enable_timing=True)
+            end_event = torch.cuda.Event(enable_timing=True)
+
+            start_event.record()
             weight_bf16 = bnb.functional.dequantize_4bit(
                 self.base_layer.weight.data, self.base_layer.weight.quant_state, quant_type = "nf4"
             )
+            end_event.record()
+            torch.cuda.synchronize()
+
+            self.dequantization_cost = start_event.elapsed_time(end_event)
+
             # assert weight_bf16.dtype == compute_dtype
             bias = None if self.base_layer.bias is None else self.base_layer.bias.detach().clone()
 
@@ -522,10 +552,19 @@ class Linear(SQALoraLayer):
         elif self.quant_method == "fp4":
             if not isinstance(self.base_layer, bnb.nn.Linear4bit):
                 raise RuntimeError(f"The quantization method is {self.quant_method}, however the type of base_layer is {type(self.base_layer)}.")
+            
+            start_event = torch.cuda.Event(enable_timing=True)
+            end_event = torch.cuda.Event(enable_timing=True)
 
+            start_event.record()
             weight_bf16 = bnb.functional.dequantize_4bit(
-                self.base_layer.weight.data, self.base_layer.weight.quant_state, quant_type = "nf4"
+                self.base_layer.weight.data, self.base_layer.weight.quant_state, quant_type = "fp4"
             )
+            end_event.record()
+            torch.cuda.synchronize()
+
+            self.dequantization_cost = start_event.elapsed_time(end_event)
+
             # assert weight_bf16.dtype == compute_dtype
             bias = None if self.base_layer.bias is None else self.base_layer.bias.detach().clone()
 
@@ -572,7 +611,7 @@ class Linear(SQALoraLayer):
             self.quant_state = None
             self.quantized = False
         elif self.quant_method == "mxfp4":
-            raise NotImplementedError("MXFP4 quantization is not implemented yet.")
+            print(f"mxfp4 has already dequantized!")
         else:
             raise ValueError("Only nf4, fp4, hqq, fp8, int8, mxfp4 are supported.")
 
