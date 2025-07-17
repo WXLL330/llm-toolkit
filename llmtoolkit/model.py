@@ -229,6 +229,11 @@ def get_accelerate_model(
         "attn_implementation": attn_implementation,
         "torch_dtype": compute_dtype,
     }
+
+    trust_remote_code = kwargs.get("trust_remote_code", False)
+    if trust_remote_code:
+        pretrained_model_kwargs.update({"trust_remote_code": True})
+    
     if parallelism == "dp":
         # TODO: check if load the model on the first GPU is ok when there is a acceletate prepare later
         # pretrained_model_kwargs.update({"device_map": "cuda:0"})
@@ -291,6 +296,7 @@ def get_accelerate_model(
         )
 
     print_rank_0(f"Loading base model from {model_name_or_path}.")
+    print_rank_0(f"pretrained model kwargs:\n{pretrained_model_kwargs}")
     model = AutoModelForCausalLM.from_pretrained(**pretrained_model_kwargs)
 
     if compute_dtype == torch.float16 and (is_ipex_available() and torch.xpu.is_available()):
@@ -303,7 +309,7 @@ def get_accelerate_model(
 
     model.config.torch_dtype = compute_dtype
 
-    tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
+    tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, trust_remote_code=trust_remote_code)
     # the padding side should be left when generating and right when training/tuning
     # TODO: check if left padding will cause any issues
     tokenizer.padding_side = "left"

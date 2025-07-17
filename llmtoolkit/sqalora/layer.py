@@ -14,7 +14,7 @@ from .utils import (
     transpose,
 )
 
-from mx import MXLinearPTQ, finalize_mx_specs
+from mx import MXLinearPTQ, MXLinearPTQv2, finalize_mx_specs
 
 
 """
@@ -476,7 +476,14 @@ class Linear(SQALoraLayer):
             }
             mx_specs = finalize_mx_specs(mx_specs)
             
-            qlinear = MXLinearPTQ(
+            # qlinear = MXLinearPTQ(
+            #     in_features=self.in_features,
+            #     out_features=self.out_features,
+            #     bias=bias is not None,
+            #     mx_specs=mx_specs,
+            # ).to(device)
+
+            qlinear = MXLinearPTQv2(
                 in_features=self.in_features,
                 out_features=self.out_features,
                 bias=bias is not None,
@@ -486,25 +493,18 @@ class Linear(SQALoraLayer):
             qlinear.weight = nn.Parameter(weight_bf16.data, requires_grad=False).to(device)
             if bias is not None:
                 qlinear.bias = nn.Parameter(bias.data, requires_grad=False).to(device)
-            # qlinear.weight.data.copy_(weight_bf16.data)
-            # if bias is not None:
-            #     qlinear.bias.data.copy_(bias.data)
                 
-            qlinear.prequantize_weights()
-
-            # del weight
-            # if bias is not None:
-            #     del bias
+            # qlinear.prequantize_weights()
 
             self.base_layer = qlinear
             self.quantized = True
         else:
             raise ValueError("Only nf4, fp4, hqq, fp8, mxfp4 are supported.")
         
-        for name, param in self.base_layer.named_parameters():
-            if param.requires_grad:
-                print(f"Warning: Parameter {name} still has requires_grad=True")
-                param.requires_grad = False
+        # for name, param in self.base_layer.named_parameters():
+        #     if param.requires_grad:
+        #         print(f"Warning: Parameter {name} still has requires_grad=True")
+        #         param.requires_grad = False
 
     @torch.no_grad()
     def dequantize(

@@ -94,11 +94,16 @@ def transformers_inference(
         generated_outputs = []
         for gen_ids, inp_ids in zip(generated_ids, input_ids):
             input_length = len(inp_ids)
-            generated_outputs.append(gen_ids[input_length:].tolist())
+            output_ids = gen_ids[input_length:].tolist()
 
-        batch_predictions = tokenizer.batch_decode(generated_outputs)
+            if tokenizer.eos_token_id in output_ids:
+                output_ids = output_ids[:output_ids.index(tokenizer.eos_token_id) + 1]
+            generated_outputs.append(output_ids)
+
+        batch_predictions = tokenizer.batch_decode(generated_outputs, skip_special_tokens=True)
         for offset, (input_text, full_output) in enumerate(zip(batch_prompts, batch_predictions)):
             orig_idx = sorted_indices[start + offset]
+            # print(f"response: {full_output}")
             all_predictions[orig_idx] = {"prompt": input_text, "response": full_output}
 
     all_predictions = accelerator.gather_for_metrics(all_predictions)
@@ -183,6 +188,12 @@ def vllm_inference(
         "tensor_parallel_size": gsi.info["n_gpus"],
         "gpu_memory_utilization": 0.9,
     }
+    if "DeepSeek" in model_name_or_path:
+        vllm_kwargs.update({
+            "max_model_len": 1024,
+            "trust_remote_code": True,
+            "enforce_eager": True,
+        })
     if quant_method:
         if quant_method == "nf4":
             vllm_kwargs.update({"quantization": "bitsandbytes", "load_format": "bitsandbytes"})
