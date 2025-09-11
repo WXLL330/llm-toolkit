@@ -8,6 +8,7 @@ import torch.nn as nn
 
 from .utils import (
     _get_mask_prune_magnitude,
+    cast_input_dtype,
     decomposeW2LinearWeightLR,
     mergeW2AB,
     transpose,
@@ -255,7 +256,7 @@ class Linear(SQALoraLayer):
             lora_B = self.lora_B
             dropout = self.lora_dropout
             scaling = self.scaling
-            x = self._cast_input_dtype(x, self.lora_A.weight.dtype)
+            x = cast_input_dtype(x, self.lora_A.weight.dtype)
             if self.sparse_preserve_mode == 0:
                 result = result + lora_B(lora_A(dropout(x))) * scaling
             elif self.sparse_preserve_mode == 1:
@@ -335,35 +336,6 @@ class Linear(SQALoraLayer):
             raise ValueError("sparse_preserve_mode should be in (0,1,2).")
         if self.quantized:
             self.dequantize()
-            # when sparse_prune_largest is True, we only perform sparse on base weight without merging
-            # since sparse_prune_largest is mainly designed for quantized tiles
-            if sparse_prune_largest:
-                base_layer = self.get_base_layer()
-                sparse_mask = _get_mask_prune_magnitude(
-                    base_layer.weight.data,
-                    sparsity_ratio,
-                    prune_n,
-                    prune_m,
-                    sparse_prune_largest,
-                    offload,
-                )
-                self.apply_sparse_and_update_WL_WR(sparse_mask)
-            else:
-                self.merge()
-                base_layer = self.get_base_layer()
-                sparse_mask = _get_mask_prune_magnitude(
-                    base_layer.weight.data,
-                    sparsity_ratio,
-                    prune_n,
-                    prune_m,
-                    sparse_prune_largest,
-                    offload,
-                )
-                self.unmerge()
-                self.apply_sparse_and_update_WL_WR(sparse_mask)
-            self.quantize()
-        else:
-            self.merge()
             base_layer = self.get_base_layer()
             sparse_mask = _get_mask_prune_magnitude(
                 base_layer.weight.data,
@@ -373,9 +345,19 @@ class Linear(SQALoraLayer):
                 sparse_prune_largest,
                 offload,
             )
-            self.unmerge()
             self.apply_sparse_and_update_WL_WR(sparse_mask)
-
+            self.quantize()
+        else:
+            base_layer = self.get_base_layer()
+            sparse_mask = _get_mask_prune_magnitude(
+                base_layer.weight.data,
+                sparsity_ratio,
+                prune_n,
+                prune_m,
+                sparse_prune_largest,
+                offload,
+            )
+            self.apply_sparse_and_update_WL_WR(sparse_mask)
 
     @torch.no_grad()
     def quantize(
@@ -571,11 +553,6 @@ class Linear(SQALoraLayer):
     #     total = base_layer.weight.data.numel()
     #     return num_zeros / total
 
-    def _cast_input_dtype(self, x: torch.Tensor, dtype: torch.dtype) -> torch.Tensor:
-        if x.dtype == dtype:
-            return x
-        else:
-            return x.to(dtype)
 
     def __repr__(self) -> str:
         rep = super().__repr__()
