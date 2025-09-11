@@ -83,6 +83,7 @@ def peft_model(
     lora_scale: float,
     init_lora_weights: str,
     sparse_preserve_mode: int,
+    aws: bool,
     quant_method: str,
 ):
     if peft_method in ["lora", "lorafa", "vera", "dora", "sqalora"]:
@@ -107,6 +108,7 @@ def peft_model(
             modules = [s for s in modules if all(module not in s for module in attention_modules)]
         else:
             target_modules = lora_modules.split(",")
+            print(f"target modules: {target_modules}")
             for m in target_modules:
                 if m not in modules:
                     raise ValueError(f"You must choose your lora modules from {modules}.")
@@ -172,6 +174,7 @@ def peft_model(
                 target_modules=modules,
                 init_lora_weights=init_lora_weights if init_lora_weights is not None else True,
                 sparse_preserve_mode=sparse_preserve_mode,
+                aws=aws,
                 quant_method=quant_method,
             )
             _peft_model = SQALoraModel(model, config)
@@ -230,9 +233,15 @@ def get_accelerate_model(
         "torch_dtype": compute_dtype,
     }
 
+    pretrained_tokenizer_kwargs = {
+        "pretrained_model_name_or_path": model_name_or_path,
+        "padding_side": "right",
+    }
+
     trust_remote_code = kwargs.get("trust_remote_code", False)
     if trust_remote_code:
         pretrained_model_kwargs.update({"trust_remote_code": True})
+        pretrained_tokenizer_kwargs.update({"trust_remote_code": True})
     
     if parallelism == "dp":
         # TODO: check if load the model on the first GPU is ok when there is a acceletate prepare later
@@ -298,6 +307,7 @@ def get_accelerate_model(
     print_rank_0(f"Loading base model from {model_name_or_path}.")
     print_rank_0(f"pretrained model kwargs:\n{pretrained_model_kwargs}")
     model = AutoModelForCausalLM.from_pretrained(**pretrained_model_kwargs)
+    print(model)
 
     if compute_dtype == torch.float16 and (is_ipex_available() and torch.xpu.is_available()):
         compute_dtype = torch.bfloat16
@@ -309,10 +319,10 @@ def get_accelerate_model(
 
     model.config.torch_dtype = compute_dtype
 
-    tokenizer = AutoTokenizer.from_pretrained(model_name_or_path, trust_remote_code=trust_remote_code)
+    tokenizer = AutoTokenizer.from_pretrained(**pretrained_tokenizer_kwargs)
     # the padding side should be left when generating and right when training/tuning
     # TODO: check if left padding will cause any issues
-    tokenizer.padding_side = "left"
+    # tokenizer.padding_side = "left"
 
     auto_add_special_tokens(model, tokenizer)
 
@@ -328,8 +338,10 @@ def get_accelerate_model(
             peft_config.lora_scale,
             peft_config.init_lora_weights,
             peft_config.sparse_preserve_mode,
+            peft_config.aws,
             quant_method,
         )
+        print(model)
 
         if flash_attn or deepspeed is not None:
             for name, module in model.named_modules():

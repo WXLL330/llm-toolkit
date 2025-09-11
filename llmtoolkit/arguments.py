@@ -311,6 +311,18 @@ class TrainingArguments(transformers.Seq2SeqTrainingArguments):
         default=False,
         metadata={"help": "If True, do Sparse-Quantization-Aware training."},
     )
+    delay_quant: bool = field(
+        default=False,
+        metadata={"help": "If True, delay quant time."},
+    )
+    quant_step: int = field(
+        default=0,
+        metadata={"help": "the step to apply quant."},
+    )
+    aws: bool = field(
+        default=False,
+        metadata={"help": "If True, do Activation-Aware-Sparse."},
+    )
     unify_save: bool = field(
         default=False,
         metadata={

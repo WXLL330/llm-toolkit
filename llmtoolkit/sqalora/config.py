@@ -80,6 +80,9 @@ class SQALoraConfig:
     sparse_preserve_mode: int = field(
         default=0, metadata={"help": "Merge sparse W into A and B to preserve accuracy. Default is 0."}
     )
+    aws: bool = field(
+        default=False, metadata={"help": "AWS"}
+    )
     quantization: bool = field(
         default=False,
         metadata={"help": "Whether to quantize the base weight when generating SQALoramodel. This is useful when from_pretrained."},

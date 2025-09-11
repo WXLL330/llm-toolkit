@@ -24,6 +24,7 @@ if model_args.peft:
         lora_scale=model_args.lora_scale,
         init_lora_weights=model_args.init_lora_weights,
         sparse_preserve_mode=training_args.sparse_preserve_mode,
+        aws=False,
     )
 else:
     peft_config = None

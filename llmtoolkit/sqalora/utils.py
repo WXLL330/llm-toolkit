@@ -17,30 +17,48 @@ def _get_mask_prune_magnitude(
     prune_m: int,
     largest: bool,
     offload: bool,
+    aws: bool,
+    activation_mean,
 ) -> torch.tensor:
     """
     get mask for pruning based on magnitude.
     largest: if True, prune the largest weights, otherwise prune the smallest weights.
     """
-    W_metric = torch.abs(W)
-    if prune_n != 0:
-        W_mask = torch.zeros_like(W, dtype=torch.bool)
-        for ii in range(W_metric.shape[1]):
-            if ii % prune_m == 0:
-                tmp = W_metric[:, ii : (ii + prune_m)].float()
-                idx_to_keep = torch.topk(tmp, prune_n, dim=1, largest=largest)[1]
-                W_mask.scatter_(1, ii + idx_to_keep, True)
-    else:
-        if largest:
-            thresh = torch.sort(W_metric.flatten(), descending=True)[0][int(W.numel() * sparsity_ratio)].cpu()
-            W_mask = W_metric >= thresh
+    if not aws:
+        W_metric = torch.abs(W)
+        if prune_n != 0:
+            W_mask = torch.zeros_like(W, dtype=torch.bool)
+            for ii in range(W_metric.shape[1]):
+                if ii % prune_m == 0:
+                    tmp = W_metric[:, ii : (ii + prune_m)].float()
+                    idx_to_keep = torch.topk(tmp, prune_n, dim=1, largest=largest)[1]
+                    W_mask.scatter_(1, ii + idx_to_keep, True)
         else:
-            thresh = torch.sort(W_metric.flatten())[0][int(W.numel() * sparsity_ratio)].cpu()
-            W_mask = W_metric < thresh
-    if offload:
-        return W_mask.cpu()
+            if largest:
+                thresh = torch.sort(W_metric.flatten(), descending=True)[0][int(W.numel() * sparsity_ratio)].cpu()
+                W_mask = W_metric >= thresh
+            else:
+                thresh = torch.sort(W_metric.flatten())[0][int(W.numel() * sparsity_ratio)].cpu()
+                W_mask = W_metric < thresh
+        if offload:
+            return W_mask.cpu()
+        else:
+            return W_mask
     else:
-        return W_mask
+        # TODO: prune_largest
+        X_l2 = activation_mean.sqrt()   # [in_features]
+        print(X_l2.shape)
+        W_l2 = torch.norm(W, dim=0).detach().cpu()
+        print(W_l2.shape)
+        scores = X_l2 * W_l2    #[in_features]
+        k = int(scores.numel() * sparsity_ratio)
+        if k > 0:
+            thresh, _ = torch.kthvalue(scores, k)
+            W_mask = (scores < thresh).unsqueeze(0).expand(W.shape[0], -1)
+            if offload:
+                return W_mask.cpu()
+            else:
+                return W_mask
 
 
 @torch.no_grad()

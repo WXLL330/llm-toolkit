@@ -107,6 +107,8 @@ def train(
                 sparse_steps=training_args.sparse_steps,
                 sparse_prune_largest=training_args.sparse_prune_largest,
                 SQAT=training_args.SQAT,
+                delay_quant=training_args.delay_quant,
+                quant_step=training_args.quant_step,
             )
         )
 

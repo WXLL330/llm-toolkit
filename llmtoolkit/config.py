@@ -9,6 +9,7 @@ class PEFTConfig:
     lora_scale: float
     init_lora_weights: str
     sparse_preserve_mode: int
+    aws: bool
 
 
 @dataclass

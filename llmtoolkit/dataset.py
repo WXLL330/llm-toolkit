@@ -345,7 +345,11 @@ class PrepareDataset:
         """
         system_message = "You are a helpful assistant. Below is an instruction that describes a task. Write a response that appropriately completes the request."
         dataset = load_dataset("meta-math/MetaMathQA-40K")
-
+        # if torch.distributed.is_initialized():
+        #     if torch.distributed.get_rank() > 0:
+        #         print("waiting for the main process to finish loading the dataset...")
+        #         torch.distributed.barrier()
+        
         def _preprocess_doc(example):
             input_str = SFTPrompt.instruction.format(instruction=example["query"])
             output_str = example["response"]
@@ -357,6 +361,11 @@ class PrepareDataset:
             _source, _target = apply_chat_template_to_train(chat, self.tokenizer)
             return {"input": _source, "output": _target}
 
+        # preprocess_data = dataset.map(_preprocess_doc, num_proc=gsi.info["n_cpus"])
+        # if torch.distributed.is_initialized():
+        #     if torch.distributed.get_rank() == 0:
+        #         print("waiting for other processes to finish loading the dataset...")
+        #         torch.distributed.barrier()
         return dataset.map(_preprocess_doc, num_proc=gsi.info["n_cpus"])
 
     def prepare_codefeedback(self) -> datasets.Dataset:

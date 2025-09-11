@@ -130,16 +130,20 @@ class SQALoraLayer(nn.Module):
         device_B = self.lora_B.weight.device
 
         if mode == 0:
+            # return None, None
             return
         elif mode == 1:
             self.WL.update({"sparse_step_0": nn.Linear(WL.shape[1], WL.shape[0], bias=False, dtype=dtype_A)})
             self.WR.update({"sparse_step_0": nn.Linear(WR.shape[1], WR.shape[0], bias=False, dtype=dtype_B)})
             self.WL["sparse_step_0"].weight.data = WL
             self.WR["sparse_step_0"].weight.data = WR
-            self.WL["sparse_step_0"].requires_grad_(False)
-            self.WR["sparse_step_0"].requires_grad_(False)
+            self.WL["sparse_step_0"].requires_grad_(True)
+            self.WR["sparse_step_0"].requires_grad_(True)
             self.WL["sparse_step_0"].to(device_A)
             self.WR["sparse_step_0"].to(device_B)
+
+            # new_wl_layer = self.WL["sparse_step_0"]
+            # new_wr_layer = self.WR["sparse_step_0"]
         elif mode == 2:
             self.WL.update(
                 {f"sparse_step_{len(self.WL)}": nn.Linear(WL.shape[1], WL.shape[0], bias=False, dtype=dtype_A)}
@@ -149,12 +153,17 @@ class SQALoraLayer(nn.Module):
             )
             self.WL[f"sparse_step_{len(self.WL) - 1}"].weight.data = WL
             self.WR[f"sparse_step_{len(self.WR) - 1}"].weight.data = WR
-            self.WL[f"sparse_step_{len(self.WL) - 1}"].requires_grad_(False)
-            self.WR[f"sparse_step_{len(self.WR) - 1}"].requires_grad_(False)
+            self.WL[f"sparse_step_{len(self.WL) - 1}"].requires_grad_(True)
+            self.WR[f"sparse_step_{len(self.WR) - 1}"].requires_grad_(True)
             self.WL[f"sparse_step_{len(self.WL) - 1}"].to(device_A)
             self.WR[f"sparse_step_{len(self.WR) - 1}"].to(device_B)
+
+            # new_wl_layer = self.WL[f"sparse_step_{len(self.WL) - 1}"]
+            # new_wr_layer = self.WR[f"sparse_step_{len(self.WR) - 1}"]
         else:
             raise ValueError(f"Unknown mode {mode}")
+        
+        # return new_wl_layer, new_wr_layer
 
 
 class Linear(SQALoraLayer):
@@ -170,6 +179,7 @@ class Linear(SQALoraLayer):
         use_rslora: bool = False,
         lora_bias: bool = False,
         sparse_preserve_mode: int = 0,
+        aws: bool = False,
         quant_method: str = "nf4",
         **kwargs,
     ) -> None:
@@ -179,6 +189,32 @@ class Linear(SQALoraLayer):
         self.quant_method = quant_method
 
         self.update_layer(r, lora_alpha, lora_dropout, init_lora_weights, use_rslora, lora_bias)
+
+        self.aws = False
+        if aws:
+            self.aws = aws
+            self.activation_mean = None
+            self.activation_count = 0
+            self._act_hook_handle = self.register_forward_hook(self.register_activation_saver())
+    
+    def register_activation_saver(self):
+        def hook(_, inputs, outputs):
+            x = inputs[0].detach().cpu()    # [batch_size, seq_len, in_features]
+            x_flat = x.reshape(-1, self.in_features)    # [batch_size*seq_len, in_features]
+            batch_sq = (x_flat ** 2).mean(dim=0)  # [in_features]
+
+            count = self.activation_count
+            if count == 0:
+                self.activation_mean = batch_sq
+            else:
+                self.activation_mean = (self.activation_mean * count + batch_sq) / (count + 1)
+            self.activation_count += 1
+        return hook
+
+    def remove_activation_hook(self):
+        if hasattr(self, "_act_hook_handle") and self._act_hook_handle is not None:
+            self._act_hook_handle.remove()
+            self._act_hook_handle = None
 
     @torch.no_grad()
     def merge(self, safe_merge: bool = False) -> None:
@@ -272,6 +308,7 @@ class Linear(SQALoraLayer):
             elif self.sparse_preserve_mode == 2:
                 result = result + lora_B(lora_A(dropout(x))) * scaling
                 for wlr_name in self.WL:
+                    # print(f"x on {x.device}, WL on {self.WL[wlr_name].weight.device}, WR on {self.WR[wlr_name].weight.device}")
                     result = result + self.WR[wlr_name](self.WL[wlr_name](x))
             else:
                 raise ValueError(f"Unknown sparse preserve mode {self.sparse_preserve_mode}")
@@ -283,6 +320,9 @@ class Linear(SQALoraLayer):
         #TODO: check if the base_layer.weight.data is float16 or bfloat16
         base_layer = self.get_base_layer()
         sparse_preserve_mode = self.sparse_preserve_mode
+
+        # new_layers = []
+
         if sparse_preserve_mode == 0:
             self.apply_sparse_mask(sparse_mask)
         elif sparse_preserve_mode == 1:
@@ -295,8 +335,10 @@ class Linear(SQALoraLayer):
                 self.lora_B.weight,
                 self.scaling,
             )
+            # new_wl, new_wr = self.update_WL_WR(WL, WR, 1)
+            # new_layers.extend([new_wl, new_wr])
             self.update_WL_WR(WL, WR, 1)
-            pass
+            # pass
         elif sparse_preserve_mode == 2:
             tmp_W = base_layer.weight.data.detach().clone()
             self.apply_sparse_mask(sparse_mask)
@@ -305,10 +347,13 @@ class Linear(SQALoraLayer):
                 tmp_W,
                 self.r,
             )
+            # new_wl, new_wr = self.update_WL_WR(WL, WR, 2)
+            # new_layers.extend([new_wl, new_wr])
             self.update_WL_WR(WL, WR, 2)
-            pass
+            # pass
         else:
             raise ValueError(f"Unknown sparse preserve mode {sparse_preserve_mode}")
+
 
     @torch.no_grad()
     def prune(
@@ -318,6 +363,8 @@ class Linear(SQALoraLayer):
         prune_m=0,
         offload=True,
         sparse_prune_largest=False,
+        optimizer=None,
+        isLast=False,
     ):
         """
         Prune the weights of the base layer to make them sparse.
@@ -330,6 +377,7 @@ class Linear(SQALoraLayer):
         4. maintain quantization status before and after pruning
         """
         sparse_preserve_mode = self.sparse_preserve_mode
+        # new_layers = []
         if sparsity_ratio > 1 or sparsity_ratio < 0:
             raise ValueError("sparsity_ratio should be in (0,1).")
         if (prune_n, prune_m) not in [(0, 0), (2, 4), (4, 8), (8, 16), (16, 32), (32, 64)]:
@@ -349,10 +397,13 @@ class Linear(SQALoraLayer):
                     prune_m,
                     sparse_prune_largest,
                     offload,
+                    self.aws,
+                    activation_mean = self.activation_mean if self.aws else None
                 )
+                # new_layers = self.apply_sparse_and_update_WL_WR(sparse_mask)
                 self.apply_sparse_and_update_WL_WR(sparse_mask)
             else:
-                self.merge()
+                # self.merge()
                 base_layer = self.get_base_layer()
                 sparse_mask = _get_mask_prune_magnitude(
                     base_layer.weight.data,
@@ -361,12 +412,15 @@ class Linear(SQALoraLayer):
                     prune_m,
                     sparse_prune_largest,
                     offload,
+                    self.aws,
+                    activation_mean = self.activation_mean if self.aws else None
                 )
-                self.unmerge()
+                # self.unmerge()
+                # new_layers = self.apply_sparse_and_update_WL_WR(sparse_mask)
                 self.apply_sparse_and_update_WL_WR(sparse_mask)
             self.quantize()
         else:
-            self.merge()
+            # self.merge()
             base_layer = self.get_base_layer()
             sparse_mask = _get_mask_prune_magnitude(
                 base_layer.weight.data,
@@ -375,9 +429,27 @@ class Linear(SQALoraLayer):
                 prune_m,
                 sparse_prune_largest,
                 offload,
+                self.aws,
+                activation_mean = self.activation_mean if self.aws else None
             )
-            self.unmerge()
+            # self.unmerge()
+            # new_layers = self.apply_sparse_and_update_WL_WR(sparse_mask)
             self.apply_sparse_and_update_WL_WR(sparse_mask)
+        
+        if self.aws and isLast:
+            self.remove_activation_hook()
+        # new_params = []
+        # for new_layer in new_layers:
+        #     new_params.extend(new_layer.parameters())
+        
+        # if new_params and optimizer is not None:
+        #     optimizer.add_param_group(
+        #         {
+        #             "params": new_params,
+        #             "lr": optimizer.param_groups[0]["lr"] / 2,
+                    
+        #         }
+        #     )
 
 
     @torch.no_grad()
@@ -476,19 +548,19 @@ class Linear(SQALoraLayer):
             }
             mx_specs = finalize_mx_specs(mx_specs)
             
-            # qlinear = MXLinearPTQ(
-            #     in_features=self.in_features,
-            #     out_features=self.out_features,
-            #     bias=bias is not None,
-            #     mx_specs=mx_specs,
-            # ).to(device)
-
-            qlinear = MXLinearPTQv2(
+            qlinear = MXLinearPTQ(
                 in_features=self.in_features,
                 out_features=self.out_features,
                 bias=bias is not None,
                 mx_specs=mx_specs,
             ).to(device)
+
+            # qlinear = MXLinearPTQv2(
+            #     in_features=self.in_features,
+            #     out_features=self.out_features,
+            #     bias=bias is not None,
+            #     mx_specs=mx_specs,
+            # ).to(device)
             
             qlinear.weight = nn.Parameter(weight_bf16.data, requires_grad=False).to(device)
             if bias is not None:

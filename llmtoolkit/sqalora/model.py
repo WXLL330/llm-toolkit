@@ -100,6 +100,7 @@ class SQALoraModel(nn.Module):
             "use_rslora": sqalora_config.use_rslora,
             "lora_bias": sqalora_config.lora_bias,
             "sparse_preserve_mode": sqalora_config.sparse_preserve_mode,
+            "aws": sqalora_config.aws,
             "quant_method": quant_method,
             "loaded_in_8bit": getattr(self.model, "is_loaded_in_8bit", False),
             "loaded_in_4bit": getattr(self.model, "is_loaded_in_4bit", False),
@@ -190,6 +191,7 @@ class SQALoraModel(nn.Module):
             kwargs["use_rslora"],
             kwargs["lora_bias"],
             kwargs["sparse_preserve_mode"],
+            kwargs["aws"],
             kwargs["quant_method"],
         )
 
@@ -213,9 +215,13 @@ class SQALoraModel(nn.Module):
         config_dict[key] = config
         return config
 
-    def prune(self, sparsity_ratio: float = 0.5, prune_n=0, prune_m=0, offload=True, sparse_prune_largest=False):
+    def prune(self, sparsity_ratio: float = 0.5, prune_n=0, prune_m=0, offload=True, sparse_prune_largest=False, optimizer=None, isLast=False):
         for name, module in self.model.named_modules():
             if isinstance(module, Linear):
+                # if self.exclude_lists is not None and any(exclude in name for exclude in self.exclude_lists):
+                #     print_rank_0(f"Skipping layer - {name} for pruning as it's in the exclude list.")
+                #     continue
+                
                 print_rank_0(f"Pruning layer - {name}, sparsity ratio = {sparsity_ratio}")
                 module.prune(
                     sparsity_ratio=sparsity_ratio,
@@ -223,6 +229,8 @@ class SQALoraModel(nn.Module):
                     prune_m=prune_m,
                     offload=offload,
                     sparse_prune_largest=sparse_prune_largest,
+                    optimizer=optimizer,
+                    isLast=isLast,
                 )
 
     def quantize(self):
@@ -380,6 +388,8 @@ class SQALoraModel(nn.Module):
         """
         sqalora_config = SQALoraConfig.from_pretrained(sqalora_model_name_or_path)
         sqalora_model = cls(model, sqalora_config)
+        print(sqalora_model)
+        # print(sqalora_model.device)
 
         safetensors_path = os.path.join(sqalora_model_name_or_path, "sqalora_model.safetensors")
         if not os.path.isfile(safetensors_path):
@@ -403,11 +413,15 @@ class SQALoraModel(nn.Module):
             step_name, param_name = parts[idx + 1], parts[idx + 2]  # e.g. sparse_step_0, weight
 
             try:
-                linear_module: Linear = _get_module(sqalora_model.model, module_path)
+                linear_module: Linear = _get_module(sqalora_model, module_path)
             except AttributeError as e:
                 raise RuntimeError(f"Cannot find submodule in {module_path}") from e
 
             lr_dict: nn.ModuleDict = getattr(linear_module, lr_type)  # WL 或 WR
+            device_A = linear_module.lora_A.weight.device
+            device_B = linear_module.lora_B.weight.device
+            # print(linear_module.base_layer.weight.device)
+            # print(lr_dict)
             if step_name not in lr_dict:
                 tensor = state_dict[full_key]
                 out_dim, in_dim = tensor.shape
@@ -416,7 +430,7 @@ class SQALoraModel(nn.Module):
                     out_dim,
                     bias=False,
                     dtype=tensor.dtype,
-                    device=tensor.device,
+                    device=device_A if lr_type == "WL" else device_B,
                 )
                 lr_dict.update({step_name: new_linear})
 

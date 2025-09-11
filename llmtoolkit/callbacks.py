@@ -24,7 +24,7 @@ from .sqalora.model import(
 )
 
 from peft import PeftModel
-
+from collections import defaultdict
 
 class EmptycacheCallback(transformers.TrainerCallback):
     def on_step_begin(self, args, state, control, **kwargs):
@@ -256,7 +256,7 @@ def build_sparsity_schedule(
 
     Returns
     -------
-    dict[int, float] : {global_step : sparsity_ratio}
+    dict[int, [float]] : {global_step : sparsity_ratio}
     """
     # --------------------------- sanity checks ---------------------------
     if not (0 <= sparse_warmup <= 1 and 0 <= sparse_end <= 1):
@@ -270,7 +270,7 @@ def build_sparsity_schedule(
     if sparse_warmup > sparse_end:
         raise ValueError("sparse_warmup must be <= sparse_end")
     # when we need 1-step sparse - case 1
-    if sparse_warmup == sparse_end:
+    if sparse_warmup == sparse_end and sparse_steps == 1:
         step = int(round(sparse_end * max_steps))
         return {step: sparse_ratio}
 
@@ -278,10 +278,12 @@ def build_sparsity_schedule(
     end_step   = int(round(sparse_end   * max_steps))
 
     schedule: dict[int, float] = {}
+    # schedule = defaultdict(list)
 
     # when we need 1-step sparse - case 2
     if sparse_steps == 1:
         schedule[start_step] = sparse_ratio
+        # schedule[start_step].append(sparse_ratio)
         return schedule
 
     interval = (end_step - start_step) / (sparse_steps - 1)
@@ -300,8 +302,21 @@ def build_sparsity_schedule(
             ratio = sparse_ratio
 
         schedule[t_global] = ratio
+        # schedule[t_global].append(ratio)
 
-    return schedule
+    return dict(schedule)
+
+def _updata_optimizer(optimizer, model):
+    new_params = list(model.parameters())
+    print_rank_0(f"Updating optimizer with {len(new_params)} new parameters")
+    
+    # 替换所有参数组中的参数
+    for group in optimizer.param_groups:
+        group['params'] = new_params
+    
+    # 清空优化器状态以避免旧参数状态干扰
+    optimizer.state.clear()
+    print_rank_0("Optimizer parameters updated and state cleared")
 
 # TODO: check if the model is SQALoraModel
 class SparseCallbackBase(transformers.TrainerCallback):
@@ -314,6 +329,8 @@ class SparseCallbackBase(transformers.TrainerCallback):
         sparse_steps: int = 2,
         sparse_prune_largest: bool = False,
         SQAT = False,
+        delay_quant = False,
+        quant_step = 0,
     ):
         self.model = model
         self.sparse_ratio = sparse_ratio
@@ -323,9 +340,13 @@ class SparseCallbackBase(transformers.TrainerCallback):
         self.sparse_prune_largest = sparse_prune_largest
         self.SQAT = SQAT
         self.sparse_schedule = {}
+        self.delay_quant = delay_quant
+        self.quant_step = quant_step
 
     def on_train_begin(self, args, state, control, **kwargs):
         max_steps = state.max_steps
+        # optimizer = kwargs.get("optimizer", None)
+        # print_rank_0(optimizer)
         self.sparse_schedule = build_sparsity_schedule(
             max_steps=max_steps,
             sparse_warmup=self.sparse_warmup,
@@ -333,19 +354,37 @@ class SparseCallbackBase(transformers.TrainerCallback):
             sparse_ratio=self.sparse_ratio,
             sparse_steps=self.sparse_steps
         )
+        self.end_step = int(round(self.sparse_end * max_steps))
+
         print_rank_0(f"sparse schedule created as : {self.sparse_schedule}")
+        if self.delay_quant:
+            print_rank_0(f"Quantization will be delayed to step {self.quant_step}")
+
         if self.SQAT:
-            print_rank_0("Sparse-Quantization-Aware Training is triggered, on step 0 the unquantized model will be sparsed, then it will be quantized the whole training session.")
+            print_rank_0(f"Sparse-Quantization-Aware Training is triggered, on step 0 the unquantized model will be sparsed, then it will be quantized on step {self.quant_step}.")
             sparsity4step0 = self.sparse_schedule.pop(min(self.sparse_schedule.keys()))
             if sparsity4step0 != 0:
-                self.model.prune(sparsity_ratio = sparsity4step0, sparse_prune_largest = self.sparse_prune_largest)
-            self.model.quantize()
+                self.model.prune(sparsity_ratio = sparsity4step0, sparse_prune_largest = self.sparse_prune_largest, optimizer = None)
+                # _updata_optimizer(optimizer, self.model)
+            if not self.delay_quant:
+                self.model.quantize()
 
     def on_step_begin(self, args, state, control, **kwargs):
         step = state.global_step
+        # optimizer = kwargs.get("optimizer", None)
+        # print_rank_0(optimizer)
         if step in self.sparse_schedule:
+            isLast = False
+            if step == self.end_step:
+                isLast = True
             if isinstance(self.model, SQALoraModel):
-                self.model.prune(sparsity_ratio = self.sparse_schedule[step], sparse_prune_largest = self.sparse_prune_largest)
+                for sparsity_ratio in self.sparse_schedule[step]:
+                    self.model.prune(sparsity_ratio = sparsity_ratio, sparse_prune_largest = self.sparse_prune_largest, optimizer = None, isLast=isLast)
+                # _updata_optimizer(optimizer, self.model)
+                print_rank_0("model:", self.model)
                 print_rank_0("sparsity", self.model.calculate_sparsity())
             elif isinstance(self.model, PeftModel):
                 prune_magnitude(self.model, sparsity_ratio=self.sparse_schedule[step], sparse_prune_largest=self.sparse_prune_largest)
+                
+        if self.delay_quant and step == self.quant_step:
+            self.model.quantize()
