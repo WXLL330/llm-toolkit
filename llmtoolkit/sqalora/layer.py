@@ -14,6 +14,8 @@ from .utils import (
     transpose,
 )
 
+from mx import finalize_mx_specs, quantize_mx_op
+
 
 """
 sparse_preserve_mode
@@ -439,7 +441,38 @@ class Linear(SQALoraLayer):
             self.base_layer = qlinear
             self.quantized = True
         elif self.quant_method == "mxfp4":
-            raise NotImplementedError("MXFP4 quantization is not implemented yet.")
+            # raise NotImplementedError("MXFP4 quantization is not implemented yet.")
+            device = self.base_layer.weight.device
+            weight_bf16 = self.base_layer.weight.data
+            bias = None if self.base_layer.bias is None else self.base_layer.bias.detach().clone()
+
+            mx_specs = {
+                'scale_bits': 8,
+                'w_elem_format': 'fp4_e2m1',
+                'block_size': 32,
+                'bfloat': 16,
+                'custom_cuda': True,
+                'round': 'even',
+                # For quantization-aware finetuning, do backward pass in FP32
+                # 'quantize_backprop': False,
+            }
+            mx_specs = finalize_mx_specs(mx_specs)
+
+            with torch.no_grad():
+                qis_weight = quantize_mx_op(
+                    weight_bf16,
+                    mx_specs,
+                    elem_format=mx_specs['w_elem_format'],
+                    axes=[-1],
+                    round=mx_specs["round_mx_output"],
+                )
+                self.base_layer.weight.data = qis_weight
+                # print(self.base_layer.weight.data)
+                if bias is not None:
+                    self.base_layer.bias.data = bias.data
+
+            self.quantized = True
+
         else:
             raise ValueError("Only nf4, fp4, hqq, fp8, mxfp4 are supported.")
 
@@ -528,7 +561,8 @@ class Linear(SQALoraLayer):
             self.quant_state = None
             self.quantized = False
         elif self.quant_method == "mxfp4":
-            raise NotImplementedError("MXFP4 quantization is not implemented yet.")
+            # raise NotImplementedError("MXFP4 quantization is not implemented yet.")
+            print("MXFP4 already dequantization")
         else:
             raise ValueError("Only nf4, fp4, hqq, fp8, int8, mxfp4 are supported.")
 
