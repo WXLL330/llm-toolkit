@@ -58,9 +58,9 @@ def train(
     key: str,
     **kwargs,
 ):
-    accelerator = Accelerator()
-    if training_args.parallelism == "dp":
-        model = accelerator.prepare(model)
+    # accelerator = Accelerator()
+    # if training_args.parallelism == "dp":
+    #     model = accelerator.prepare(model)
 
     set_seed(training_args.seed)
     if training_args.deepspeed:
@@ -148,7 +148,8 @@ def train(
         if save_strategy == "steps" or save_strategy == "epoch":
             trainer.save_metrics("train", metrics)
             trainer.save_state()
-            unwrap_model = accelerator.unwrap_model(trainer.model)
+            # unwrap_model = accelerator.unwrap_model(trainer.model)
+            unwrap_model = trainer.model
             if not isinstance(unwrap_model, (PeftModel, transformers.PreTrainedModel, SQALoraModel)):
                 print_rank_0(
                     "The model is not a PeftModel or PreTrainedModel or SQALoraModel, so it will not be saved. "

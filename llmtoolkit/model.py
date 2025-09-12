@@ -174,6 +174,10 @@ def peft_model(
                 quant_method=quant_method,
             )
             _peft_model = SQALoraModel(model, config)
+        elif peft_method == "cclora":
+            from .cclinear import replace_linear_with_cclinear
+            model = replace_linear_with_cclinear(model, )
+
     elif peft_method == "prefix":
         config = PrefixTuningConfig(
             num_virtual_tokens=30,
@@ -230,7 +234,7 @@ def get_accelerate_model(
     }
     if parallelism == "dp":
         # TODO: check if load the model on the first GPU is ok when there is a acceletate prepare later
-        # pretrained_model_kwargs.update({"device_map": "cuda:0"})
+        pretrained_model_kwargs.update({"device_map": "cuda"})
         pass
     elif parallelism == "pp":
         pretrained_model_kwargs.update({"device_map": "auto"})
