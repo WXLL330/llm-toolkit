@@ -220,6 +220,7 @@ def evaluate_JIT(
     task: str,
     model,
     tokenizer,
+    batch_size: int = 1,
 ) -> float:
     if task == "gsm8k":
         strategy = GSM8KEvaluationStrategy()
@@ -240,7 +241,7 @@ def evaluate_JIT(
         "gsm8k": 1024,
     }
 
-    results = transformers_inference(prompts=prompts, max_tokens=max_tokens[task], model=model, tokenizer=tokenizer)
+    results = transformers_inference(prompts=prompts, max_tokens=max_tokens[task], model=model, tokenizer=tokenizer, batch_size=batch_size)
 
     if get_rank() != 0 or results is None:
         return None

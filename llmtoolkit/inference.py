@@ -83,9 +83,9 @@ def transformers_inference(
             generated_ids = raw_model.generate(
                 **encoded_prompts,
                 max_new_tokens=max_tokens,
-                top_p=0.0,
-                temperature=0.1,
-                do_sample=True,
+                top_p=0.1,
+                temperature=0.0,
+                do_sample=False,
                 pad_token_id=tokenizer.pad_token_id,
                 eos_token_id=tokenizer.eos_token_id,
                 use_cache=True,
@@ -94,11 +94,16 @@ def transformers_inference(
         generated_outputs = []
         for gen_ids, inp_ids in zip(generated_ids, input_ids):
             input_length = len(inp_ids)
-            generated_outputs.append(gen_ids[input_length:].tolist())
+            output_ids = gen_ids[input_length:].tolist()
 
-        batch_predictions = tokenizer.batch_decode(generated_outputs)
+            if tokenizer.eos_token_id in output_ids:
+                output_ids = output_ids[:output_ids.index(tokenizer.eos_token_id) + 1]
+            generated_outputs.append(output_ids)
+
+        batch_predictions = tokenizer.batch_decode(generated_outputs, skip_special_tokens=True)
         for offset, (input_text, full_output) in enumerate(zip(batch_prompts, batch_predictions)):
             orig_idx = sorted_indices[start + offset]
+            # print(f"response: {full_output}")
             all_predictions[orig_idx] = {"prompt": input_text, "response": full_output}
 
     all_predictions = accelerator.gather_for_metrics(all_predictions)
